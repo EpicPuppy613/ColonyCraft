@@ -19,7 +19,7 @@
   - [ ] Happiness & health
   - [ ] Random events
     - [ ] EOTW
-- [ ] Goin on "runs" -> gain legacy xp
+- [ ] Goin on "runs"/new colony -> gain legacy xp
   - [ ] Lose everything at end of a "run" aka "ascending"
 - [ ] Level up and gain skill & talent points
   - [ ] Skill tree
