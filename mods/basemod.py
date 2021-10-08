@@ -20,19 +20,34 @@ colony.adult = 0
 colony.elder = 0
 colony.hapiness = 0
 colony.health = 0
+colony.modifier = 0
 G.colony = colony
+
+
+#Tick Commands
+def population_update(g):
+    g.colony.elder -= round(g.colony.elder * 0.1)
+    g.colony.elder += round(g.colony.adult * 0.075)
+    g.colony.adult -= round(g.colony.adult * 0.075)
+    g.colony.adult += round(g.colony.young * 0.15)
+    g.colony.young -= round(g.colony.young * 0.15)
+    g.colony.young += round(g.colony.adult * 0.5 * g.colony.modifier)
 
 
 #Define all commands
 def get_stats(g):
-    print("-[LEGACY STATS]-\nLevel: " + str(stats.level) + "\nXP: " +
-          str(stats.xp) + "/" + str(stats.lvlup) + " " +
-          g.gen_bar(stats.xp, stats.lvlup, 20) + "\nSkill Points: " +
-          str(stats.skillpts) + "\nTalent Points: " + str(stats.talentpts))
+    print("-[LEGACY STATS]-\nLevel: " + str(g.stats.level) + "\nXP: " +
+          str(g.stats.xp) + "/" + str(g.stats.lvlup) + " " +
+          g.gen_bar(g.stats.xp, g.stats.lvlup, 20) + "\nSkill Points: " +
+          str(g.stats.skillpts) + "\nTalent Points: " + str(g.stats.talentpts))
 
 
 def check_colony(g):
-  pass
+    print("-[COLONY INFO]-\nPOPULATION:\nChildren: " + str(g.colony.young) +
+          "\nAdults: " + str(g.colony.adult) + "\nElderly: " +
+          (g.colony.elder) + "\nCONDITIONS:\rHapiness: " +
+          str(round(g.colony.hapiness / 10)) + "%\nHealth: " +
+          str(round(g.colony.health / 10)) + "%")
 
 
 def save(g):
@@ -46,10 +61,20 @@ def rsm__tick(g):
     print(
         str(round((1 - g.storage_efficiency) * 100, 1)) +
         "% of all your resources have decayed.")
+    if g.colony.hapiness > 2000:
+        hapiness = 2000
+    if g.colony.hapiness < -2000:
+        hapiness = -2000
+    hapcalc = g.colony.hapiness / 1000
+    heacalc = g.colony.health / 1000
+    #-2 -> 2
+    #0.25 -> 4?
+    #0.25->0.5, 0.5->1,1->2,2->4
 
 
 #Initialize all commands
 G.register_command("stats", __name__, "get_stats", True)
+G.register_command("colony", __name__, "check_colony")
 
 #Create Resource Categories
 G.inventory["food"] = G.Category("Food", [], "food")
@@ -79,11 +104,12 @@ G.inventory["resource"].items.append(G.Resource("Rocks", 0, "resource",
 
 #Game Start Function
 def rsm__start(g):
-    G.colony.young = 4
-    G.colony.adult = 10
-    G.colony.elder = 2
+    g.unlocked.append("colony")
+    g.colony.young = 4
+    g.colony.adult = 10
+    g.colony.elder = 2
 
 
 #Game End Function
 def rsm__end(g):
-    pass
+    G.unlocked.remove("colony")
