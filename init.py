@@ -1,5 +1,27 @@
-import math
-import sys
+import math, sys, getpass, os
+
+dev_passcode = os.environ['dev-passcode']
+
+
+class C:
+    black = "\u001b[30m"
+    red = "\u001b[31m"
+    green = "\u001b[32m"
+    yellow = "\u001b[33m"
+    blue = "\u001b[34m"
+    magenta = "\u001b[35m"
+    cyan = "\u001b[36m"
+    white = "\u001b[37m"
+    reset = "\u001b[0m"
+    d = black
+    r = red
+    g = green
+    y = yellow
+    b = blue
+    m = magenta
+    c = cyan
+    w = white
+    n = reset
 
 
 class Command:
@@ -12,10 +34,10 @@ class Command:
 
 
 class Game:
-    version = "0.1.0"
-    release = "ALPHA"
-    name = "Roguelike Survival Management - OS version 0"
-    short = "RSM - OS v0"
+    version = "0.1.1"
+    release = "{C.m}ALPHA{C.n}".format(C=C)
+    name = "{C.c}Roguelike Survival Management - OS version 0{C.n}".format(C=C)
+    short = "{C.c}RSM - OS v0{C.n}".format(C=C)
     talents = []
     commands = []
     unlocked = []
@@ -93,7 +115,7 @@ class Game:
     def get_command(self):
         command = input(">")
         if not command in self.unlocked and not command in self.hidden:
-            print("Unreconized command, try 'help' for help")
+            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(C=C))
         else:
             self.run_command(command)
 
@@ -114,6 +136,16 @@ class Game:
 
     def initialize_mod(self, mod):
         self.mods.append(mod)
+
+    def enter_dev_pass(self):
+        print("DEV PASSCODE REQUIRED\n>", end="")
+        passcode_entry = getpass.getpass("")
+        if passcode_entry == dev_passcode:
+            print("{C.g}ACCESS GRANTED{C.n}".format(C=C))
+            return True
+        else:
+            print("{C.r}INCORRECT PASSCODE{C.n}".format(C=C))
+            return False
 
 
 G = Game()

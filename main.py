@@ -1,7 +1,7 @@
 """
 Rogue-like survival management game
 Inspired by NeverEnding Legacy
-Version ALPHA 0.0.1
+Version ALPHA 0.1.1
 """
 print("Initializing...")
 from init import G

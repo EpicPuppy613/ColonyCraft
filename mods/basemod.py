@@ -18,9 +18,10 @@ colony = type('', (), {})()
 colony.young = 0
 colony.adult = 0
 colony.elder = 0
-colony.hapiness = 0
+colony.happiness = 0
 colony.health = 0
-colony.modifier = 0
+colony.modifier_work = 0
+colony.modifier_health = 0
 G.colony = colony
 
 
@@ -31,26 +32,23 @@ def population_update(g):
     g.colony.adult -= round(g.colony.adult * 0.075)
     g.colony.adult += round(g.colony.young * 0.15)
     g.colony.young -= round(g.colony.young * 0.15)
-    g.colony.young += round(g.colony.adult * 0.5 * g.colony.modifier)
+    g.colony.young += round(g.colony.adult * 0.5 * g.colony.modifier_health)
 
 
 #Define all commands
 def get_stats(g):
-    print("-[LEGACY STATS]-\nLevel: " + str(g.stats.level) + "\nXP: " +
-          str(g.stats.xp) + "/" + str(g.stats.lvlup) + " " +
-          g.gen_bar(g.stats.xp, g.stats.lvlup, 20) + "\nSkill Points: " +
-          str(g.stats.skillpts) + "\nTalent Points: " + str(g.stats.talentpts))
+    print("-[LEGACY STATS]-\nLegacy Level: {}\nLegacy XP: {}/{} {}\nSkill Points: {}\nTalent Points: {}".format(g.stats.level,g.stats.xp,g.stats.lvlup,g.gen_bar(g.stats.xp,g.stats.lvlup,20),g.stats.skillpts,g.stats.talentpts))
 
 
 def check_colony(g):
-    print("-[COLONY INFO]-\nPOPULATION:\nChildren: " + str(g.colony.young) +
-          "\nAdults: " + str(g.colony.adult) + "\nElderly: " +
-          (g.colony.elder) + "\nCONDITIONS:\rHapiness: " +
-          str(round(g.colony.hapiness / 10)) + "%\nHealth: " +
-          str(round(g.colony.health / 10)) + "%")
+    print("-[COLONY INFO]-\n-POPULATION: {}-\nChildren: {}\nAdults: {}\nElderly: {}\n-OVERALL CONDITIONS: {}%-\nHappiness: {}%\nHealth: {}%".format(g.colony.elder+g.colony.adult+g.colony.young,g.colony.young,g.colony.adult,g.colony.elder,round((g.colony.health+g.colony.happiness)/20),round(g.colony.happiness/10),round(g.colony.health/10)))
 
 
 def save(g):
+    pass
+
+
+def give_all_resources(g):
     pass
 
 
@@ -61,15 +59,15 @@ def rsm__tick(g):
     print(
         str(round((1 - g.storage_efficiency) * 100, 1)) +
         "% of all your resources have decayed.")
-    if g.colony.hapiness > 2000:
-        hapiness = 2000
-    if g.colony.hapiness < -2000:
-        hapiness = -2000
-    hapcalc = g.colony.hapiness / 1000
-    heacalc = g.colony.health / 1000
-    #-2 -> 2
-    #0.25 -> 4?
-    #0.25->0.5, 0.5->1,1->2,2->4
+    if g.colony.happiness > 2000:
+        g.colony.happiness = 2000
+    if g.colony.happiness < -2000:
+        g.colony.happiness = -2000
+    hapcalc = g.colony.happiness / 1000
+    helcalc = g.colony.happiness / 1000
+    g.colony.modifier_work = 2**hapcalc
+    g.colony.modifier_health = 2**helcalc
+
 
 
 #Initialize all commands

@@ -13,6 +13,8 @@ from init import G
 ```
 `init` is the initialization module that's run when the game is starting `G` contains the Game object.
 
+Optionally, you can also import `init.C` for easy ANSI color codes
+
 ### Defining a Command
 At the base of a command is a function that is run when the command is run. The function should only have one parameter, which is the Game object. Any variable interaction within the function should be handeled through the Game object.
 
