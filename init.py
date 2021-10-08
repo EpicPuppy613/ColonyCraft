@@ -1,6 +1,8 @@
 import math, sys, getpass, os
 
-dev_passcode = os.environ['dev-passcode']
+dev_file = open("devpasscode.txt","r")
+dev_passcode = dev_file.read().split()[0]
+dev_file.close()
 
 
 class C:
@@ -30,11 +32,11 @@ class Command:
         self.mod = mod
 
     def run(self):
-        getattr(sys.modules[self.mod], self.command)(G)
+        getattr(sys.modules[self.mod], self.command)()
 
 
 class Game:
-    version = "0.1.1"
+    version = "0.2.0"
     release = "{C.m}ALPHA{C.n}".format(C=C)
     name = "{C.c}Roguelike Survival Management - OS version 0{C.n}".format(C=C)
     short = "{C.c}RSM - OS v0{C.n}".format(C=C)
@@ -78,12 +80,7 @@ class Game:
             if not self.type in ["r", "s", "t", "a"]:
                 raise Exception("Invalid Unlockable Type!")
 
-    def register_command(self,
-                         command,
-                         mod,
-                         function,
-                         unlocked=False,
-                         hidden=False):
+    def register_command(self, command, mod, function, unlocked=False, hidden=False):
         self.commands.append(command)
         if unlocked:
             self.unlocked.append(command)
@@ -126,14 +123,6 @@ class Game:
     def printr(self, stuff):
         print(stuff, end="\r")
 
-    #Events
-    def rsm__(self, event):
-        for mod in self.mods:
-            try:
-                getattr(sys.modules[mod], "rsm__" + event)(self)
-            except:
-                pass
-
     def initialize_mod(self, mod):
         self.mods.append(mod)
 
@@ -146,6 +135,14 @@ class Game:
         else:
             print("{C.r}INCORRECT PASSCODE{C.n}".format(C=C))
             return False
+
+    #Events
+    def rsm__(self, event):
+        for mod in self.mods:
+            try:
+                getattr(sys.modules[mod], "rsm__" + event)()
+            except:
+                pass
 
 
 G = Game()

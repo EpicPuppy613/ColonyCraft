@@ -16,7 +16,7 @@ from init import G
 Optionally, you can also import `init.C` for easy ANSI color codes
 
 ### Defining a Command
-At the base of a command is a function that is run when the command is run. The function should only have one parameter, which is the Game object. Any variable interaction within the function should be handeled through the Game object.
+At the base of a command is a function that is run when the command is run. The function cannot have any parameters. Any variable interaction within the function should be handeled through the Game object.
 
 To register a command use the function `G.register_command([command_name],__name__,[function_name])`, if your command should be unlocked when the game is loaded, put `unlocked=True` when you call the function.
 
