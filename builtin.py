@@ -5,23 +5,23 @@ G.initialize_mod(__name__)
 
 
 #Define Functions
-def command_help(g):
+def command_help():
     print("{C.b}Available Commands{C.n}".format(C=C))
-    for command in g.unlocked:
+    for command in G.unlocked:
         print("- " + command)
 
 
-def get_version(g):
-    print(g.name + "\n" + g.release + " " + g.version)
+def get_version():
+    print(G.name + "\n" + G.release + " " + G.version)
 
 
-def exit(g):
+def exit():
     sys.exit()
 
 
-def show_inventory(g):
-    for category in g.inventory:
-        category = g.inventory[category]
+def show_inventory():
+    for category in G.inventory:
+        category = G.inventory[category]
         print("-[" + category.name + "]-")
         if len(category.items) == 0:
             continue
@@ -31,13 +31,13 @@ def show_inventory(g):
             print("(" + str(resource.count) + ") - " + resource.name)
 
 
-def give_resource(g):
-    if not g.enter_dev_pass():
+def give_resource():
+    if not G.enter_dev_pass():
         return False
     print("RESOURCE ID TO GIVE:\n>", end="")
     item_entry = input()
-    for category in g.inventory:
-        category = g.inventory[category]
+    for category in G.inventory:
+        category = G.inventory[category]
         for item in range(len(category.items)):
             if category.items[item].resid == item_entry:
                 print("AMOUNT TO GIVE:\n>", end="")
@@ -53,7 +53,7 @@ def give_resource(g):
     return False
 
 
-def start_colony(g):
+def start_colony():
     print(
         "{C.m}A new colony is born. From a group of 2 people, you managed to raise your colony up to a point where you have 10 adults, 4 children, and 2 elders. You must manage your colony's happiness and health in order to be sucessful."
         .format(C=C))
@@ -66,22 +66,22 @@ def start_colony(g):
         "{C.g}The colony of ".format(C=C) + colony_name +
         " is finally under your lead. Create a great nation out of it. The end of the world is coming, so you must hurry!{C.n}"
         .format(C=C))
-    g.gamestate = 1
-    g.rsm__("start")
+    G.Gamestate = 1
+    G.rsm__("start")
 
 
-def force_end(g):
+def force_end():
     print("GAME HAS BEEN FORCEFULLY ENDED")
-    g.rsm__("end")
+    G.rsm__("end")
 
 
-def tick_game(g):
+def tick_game():
     print("Another year has passed...")
-    g.rsm__("tick")
+    G.rsm__("tick")
 
 
 #Game Start Function
-def rsm__start(g):
+def rsm__start():
     G.unlocked.remove("begin")
     G.unlocked.append("inv")
     G.unlocked.append("inventory")
@@ -91,7 +91,7 @@ def rsm__start(g):
 
 
 #Game End Function
-def rsm__end(g):
+def rsm__end():
     G.unlocked.append("begin")
     G.unlocked.remove("inv")
     G.unlocked.remove("inventory")
@@ -108,6 +108,6 @@ G.register_command("quit", __name__, "exit", True)
 G.register_command("begin", __name__, "start_colony", True)
 G.register_command("inv", __name__, "show_inventory")
 G.register_command("inventory", __name__, "show_inventory")
-G.register_command("dev-give", __name__, "give_resource")
+G.register_command("dev-Give", __name__, "give_resource")
 G.register_command("force-end", __name__, "force_end")
 G.register_command("tick", __name__, "tick_game")
