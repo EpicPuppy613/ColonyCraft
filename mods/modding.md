@@ -25,6 +25,7 @@ To register a command use the function `G.register_command([command_name],__name
 - `rsm__start` (required) when a new colony is started, include all starting resource giving and command status changing in this function
 - `rsm__end` (required) when a colony ends, all resources will automatically be set to 0, revert all command status changes here
 - `rsm__tick` (optional) run when time passes, use this event to handle any time based events and job processing
+- `rsm__init` (optional) this will run after initialization has finished. If you want to process anything after everything has finished initializing, here would be where to do it.
 - ### All events below are added by basemod
 - All researches/traits/skills/talents will automatically be called when they need to.
 - `rsm__r__[research]` (optional) when a research completes, [research] will be the name of the research

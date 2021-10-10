@@ -55,7 +55,7 @@ def give_resource():
 
 def start_colony():
     print(
-        "{C.m}A new colony is born. From a group of 2 people, you managed to raise your colony up to a point where you have 10 adults, 4 children, and 2 elders. You must manage your colony's happiness and health in order to be sucessful."
+        "{C.m}A new colony is born. From a group of 2 people, you managed to raise your colony up to a point where you have 10 adults, 4 children, and 2 elders. You must manage your colony's morale and health in order to be sucessful."
         .format(C=C))
     print(
         "Out of the mess, a colony name comes up.(You can change this later){C.n}\n>"
@@ -99,6 +99,13 @@ def rsm__end():
     G.hidden.remove("dev-give")
     G.hidden.remove("force-end")
 
+
+def rsm__tick():
+    pass
+
+
+def rsm__init():
+    print("{C.b}builtin {C.custom[99]}v0.1.0{C.n}".format(C=C))
 
 #Initialize Function in Game
 

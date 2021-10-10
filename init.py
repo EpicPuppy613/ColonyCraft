@@ -1,29 +1,36 @@
-import math, sys, getpass, os
+import sys, getpass
 
-dev_file = open("devpasscode.txt","r")
-dev_passcode = dev_file.read().split()[0]
+dev_file = open("devpasscode.pass", "r")
+dev_passcode = bytes.fromhex(dev_file.readline()).decode("utf-8")
 dev_file.close()
 
 
-class C:
-    black = "\u001b[30m"
-    red = "\u001b[31m"
-    green = "\u001b[32m"
-    yellow = "\u001b[33m"
-    blue = "\u001b[34m"
-    magenta = "\u001b[35m"
-    cyan = "\u001b[36m"
-    white = "\u001b[37m"
-    reset = "\u001b[0m"
-    d = black
-    r = red
-    g = green
-    y = yellow
-    b = blue
-    m = magenta
-    c = cyan
-    w = white
-    n = reset
+class Color:
+    def __init__(self):
+        self.black = "\u001b[30m"
+        self.red = "\u001b[31m"
+        self.green = "\u001b[32m"
+        self.yellow = "\u001b[33m"
+        self.blue = "\u001b[34m"
+        self.magenta = "\u001b[35m"
+        self.cyan = "\u001b[36m"
+        self.white = "\u001b[37m"
+        self.reset = "\u001b[0m"
+        self.d = self.black
+        self.r = self.red
+        self.g = self.green
+        self.y = self.yellow
+        self.b = self.blue
+        self.m = self.magenta
+        self.c = self.cyan
+        self.w = self.white
+        self.n = self.reset
+        self.custom = []
+        for i in range(0, 256):
+            self.custom.append("\u001b[38;5;{ID}m".format(ID=i))
+
+
+C = Color()
 
 
 class Command:
@@ -36,25 +43,27 @@ class Command:
 
 
 class Game:
-    version = "0.2.0"
-    release = "{C.m}ALPHA{C.n}".format(C=C)
-    name = "{C.c}Roguelike Survival Management - OS version 0{C.n}".format(C=C)
-    short = "{C.c}RSM - OS v0{C.n}".format(C=C)
-    talents = []
-    commands = []
-    unlocked = []
-    hidden = []
-    inventory = {}
-    definitions = {}
+    def __init__(self):
+        self.commands = []
+        self.unlocked = []
+        self.hidden = []
+        self.inventory = {}
+        self.unlockables = []
+        self.unlocked = []
+        """
+        Gamestates
+        0: Menu
+        1: During run
+        """
+        self.gamestate = 0
     mods = []
-    unlockables = []
-    unlocked = []
-    """
-    Gamestates
-    0: Menu
-    1: During run
-    """
-    gamestate = 0
+    definitions = {}
+    version = "1.0.0"
+    release = "{C.custom[204]}CORE{C.n} v".format(C=C)
+    name = "{C.custom[51]}Colonycraft - CORE version 1{C.n}".format(
+            C=C)
+    short = "{C.custom[51]}CC - v1{C.n}".format(C=C)
+        
 
     class Category:
         def __init__(self, name, items, catid):
@@ -69,6 +78,14 @@ class Game:
             self.catid = catid
             self.resid = resid
 
+    class Food(Resource):
+        def __init__(self, name, count, catid, resid, saturation, enjoyment,
+                     priority):
+            super().__init__(name, count, catid, resid)
+            self.saturation = saturation
+            self.enjoyment = enjoyment
+            self.priority = priority
+
     class Unlockable:
         def __init__(self, name, desc, techid, cost, utype, reqids=[]):
             self.name = name
@@ -80,7 +97,15 @@ class Game:
             if not self.type in ["r", "s", "t", "a"]:
                 raise Exception("Invalid Unlockable Type!")
 
-    def register_command(self, command, mod, function, unlocked=False, hidden=False):
+    class Empty:
+        pass
+
+    def register_command(self,
+                         command,
+                         mod,
+                         function,
+                         unlocked=False,
+                         hidden=False):
         self.commands.append(command)
         if unlocked:
             self.unlocked.append(command)
@@ -112,7 +137,8 @@ class Game:
     def get_command(self):
         command = input(">")
         if not command in self.unlocked and not command in self.hidden:
-            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(C=C))
+            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(
+                C=C))
         else:
             self.run_command(command)
 

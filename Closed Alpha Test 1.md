@@ -1,0 +1,11 @@
+## TODO
+- [x] Colony Founding System
+- [x] Colony Reset System
+- [ ] Ascension
+- [ ] EOTW
+- [ ] Research
+- [ ] Skills
+- [ ] Traits
+- [ ] Talents
+- [x] Saving
+- [x] Loading
