@@ -113,3 +113,11 @@ G.register_command("load", __name__, "load_game", True)
 def rsm__autosave():
     autosave()
     print(C.g + "The game has been saved." + C.n)
+
+
+def rsm__init():
+    autoslot = open("saves/autoname.name","r")
+    autoname = autoslot.readline()
+    autoslot.close()
+    if autoname != "Empty":
+        print(C.m + "You have a game saved in the autosave slot! Use 'load' to load it." + C.n)
