@@ -7,12 +7,13 @@ print("Initializing...")
 from init import G
 import time as t
 import builtin
-import saving
 from mods import *
+import saving
 print("-------------")
+G.rsm__("init")
 t.sleep(0.2)
 print(G.short) 
-G.rsm__("init")
+G.rsm__("version")
 print(G.release + G.version)
 while True:
     G.get_command()

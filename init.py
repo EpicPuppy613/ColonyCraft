@@ -169,6 +169,7 @@ class Game:
                 getattr(sys.modules[mod], "rsm__" + event)()
             except:
                 pass
-
+        if event != "init" and event != "version":
+            sys.modules["saving"].rsm__autosave()
 
 G = Game()

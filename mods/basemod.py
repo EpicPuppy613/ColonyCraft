@@ -1,5 +1,6 @@
 #Import Game instance
 from init import G, C
+from random import randint
 
 G.initialize_mod(__name__)
 G.storage_efficiency = 0.9
@@ -32,12 +33,20 @@ G.colony = colony
 
 #Tick Commands
 def population_update():
-    G.colony.elder -= round(G.colony.elder * 0.1)
-    G.colony.elder += round(G.colony.adult * 0.075)
-    G.colony.adult -= round(G.colony.adult * 0.075)
-    G.colony.adult += round(G.colony.young * 0.15)
-    G.colony.younG -= round(G.colony.young * 0.15)
-    G.colony.younG += round(G.colony.adult * 0.5 * G.colony.modifier_health)
+    randdeath = randint(15, 25) / 100
+    randage = randint(4, 15) / 100
+    randgrow = randint(25, 40) / 100
+    randborn = randint(20, 40) / 100
+    print("{C.custom[166]}{} Elders have passed away.".format(round(G.colony.elder * randdeath),C=C))
+    G.colony.elder -= round(G.colony.elder * randdeath)
+    print("{C.custom[190]}{} Adults have aged.".format(round(G.colony.adult * randage),C=C))
+    G.colony.elder += round(G.colony.adult * randage)
+    G.colony.adult -= round(G.colony.adult * randage)
+    print("{C.custom[82]}{} Children have grown up.".format(round(G.colony.young * randgrow),C=C))
+    G.colony.adult += round(G.colony.young * randgrow)
+    G.colony.young -= round(G.colony.young * randgrow)
+    print("{C.custom[85]}{} Babies have been born.".format(round(G.colony.adult * randborn * G.colony.modifier_health),C=C))
+    G.colony.young += round(G.colony.adult * randborn * G.colony.modifier_health)
 
 
 #Define all commands
@@ -55,7 +64,7 @@ def get_stats():
 
 def check_colony():
     print(
-        "{C.b}-[COLONY INFO]-\n{C.c}-POPULATION: {}-{C.n}\nChildren: {}\nAdults: {}\nElderly: {}\n{C.m}-OVERALL CONDITIONS: {G.colony.ovecolor}{}%{C.n}{C.m}-{C.n}\nMorale: {G.colony.hapcolor}{}%{C.n}\nHealth: {G.colony.heacolor}{}%{C.n}"
+        "{C.b}-[COLONY INFO]-\n{C.c}-POPULATION: {}-{C.custom[85]}\nChildren: {}\n{C.custom[82]}Adults: {}\n{C.custom[190]}Elderly: {}\n{C.m}-OVERALL CONDITIONS: {G.colony.ovecolor}{}%{C.n}{C.m}-{C.n}\nMorale: {G.colony.hapcolor}{}%{C.n}\nHealth: {G.colony.heacolor}{}%{C.n}"
         .format(G.colony.elder + G.colony.adult + G.colony.young,
                 G.colony.young,
                 G.colony.adult,
@@ -127,12 +136,58 @@ def rsm__tick():
     print(C.custom[9] + str(round((1 - G.storage_efficiency) * 100, 1)) +
           "% of all your resources have decayed." + C.n)
     recalculate_wellness()
+    population_update()
+    G.eotw -= 1
+    if G.eotw <= 1:
+        print("{C.custom[196]}THE END OF THE WORLD IS HERE{C.n}".format(C=C))
+        G.stats.xp += G.colony.elder + G.colony.young + G.colony.adult
+    elif G.eotw <= 5:
+        print("{C.custom[203]}Your shamans are saying that the end of the world is coming.{C.n}".format(C=C))
 
+
+def dev_change_health():
+    if G.enter_dev_pass():
+        pass
+    else:
+        return False
+    print("ENTER POINTS TO CHANGE HEALTH BY (10pts = 1%)")
+    while True:
+        try:
+            change = int(input(">"))
+            break
+        except:
+            print(C.r+"NOT A VALID NUMBER"+C.n)
+            continue
+    G.colony.health += change
+    recalculate_wellness()
+    print(C.g+"HEALTH VALUE SUCESSFULLY CHANGED"+C.n)
+    return True
+    
+
+def dev_change_morale():
+    if G.enter_dev_pass():
+        pass
+    else:
+        return False
+    print("ENTER POINTS TO CHANGE MORALE BY (10pts = 1%)")
+    while True:
+        try:
+            change = int(input(">"))
+            break
+        except:
+            print(C.r+"NOT A VALID NUMBER"+C.n)
+            continue
+    G.colony.morale += change
+    recalculate_wellness()
+    print(C.g+"MORALE VALUE SUCESSFULLY CHANGED"+C.n)
+    return True
 
 #Initialize all commands
 G.register_command("stats", __name__, "get_stats", True)
 G.register_command("colony", __name__, "check_colony")
 G.register_command("dev-give-all", __name__, "give_all_resources")
+G.register_command("dev-change-health", __name__ ,"dev_change_health")
+G.register_command("dev-change-morale", __name__, "dev_change_morale")
 
 #Create Resource CateGories
 G.inventory["food"] = G.Category("Food", [], "food")
@@ -170,11 +225,14 @@ G.inventory["resource"].items.append(G.Resource("Rocks", 0, "resource",
 def rsm__start():
     G.unlocked.append("colony")
     G.hidden.append("dev-give-all")
+    G.hidden.append("dev-change-health")
+    G.hidden.append("dev-change-morale")
     G.colony.young = 4
     G.colony.adult = 10
     G.colony.elder = 2
     G.colony.morale = 0
     G.colony.health = 0
+    G.eotw = 20
     recalculate_wellness()
 
 
@@ -182,6 +240,8 @@ def rsm__start():
 def rsm__end():
     G.unlocked.remove("colony")
     G.hidden.remove("dev-give-all")
+    G.hidden.remove("dev-change-health")
+    G.hidden.remove("dev-change-morale")
     G.colony.young = 0
     G.colony.adult = 0
     G.colony.elder = 0
@@ -189,9 +249,10 @@ def rsm__end():
     G.colony.health = 0
     G.colony.modifier_work = 0
     G.colony.modifier_health = 0
+    G.eotw = 0
 
 
-def rsm__init():
+def rsm__version():
     release = "{C.custom[10]}basemod {C.custom[202]}ALPHA{C.n} ".format(C=C)
-    version = "0.2.0"
-    print(release+version)
+    version = "0.3.0"
+    print(release + version)

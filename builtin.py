@@ -2,7 +2,7 @@ from init import G, C
 import sys
 
 G.initialize_mod(__name__)
-
+G.colony_name = "NO COLONY"
 
 #Define Functions
 def command_help():
@@ -13,6 +13,7 @@ def command_help():
 
 def get_version():
     print(G.name + "\n" + G.release + " " + G.version)
+    G.rsm__("version")
 
 
 def exit():
@@ -55,7 +56,7 @@ def give_resource():
 
 def start_colony():
     print(
-        "{C.m}A new colony is born. From a group of 2 people, you managed to raise your colony up to a point where you have 10 adults, 4 children, and 2 elders. You must manage your colony's morale and health in order to be sucessful."
+        "{C.custom[200]}A new colony is born. From a group of 2 people, you managed to raise your colony up to a point where you have 10 adults, 4 children, and 2 elders. You must manage your colony's morale and health in order to be sucessful."
         .format(C=C))
     print(
         "Out of the mess, a colony name comes up.(You can change this later){C.n}\n>"
@@ -63,9 +64,10 @@ def start_colony():
         end="")
     colony_name = input()
     print(
-        "{C.g}The colony of ".format(C=C) + colony_name +
+        "{C.custom[154]}The colony of ".format(C=C) + colony_name +
         " is finally under your lead. Create a great nation out of it. The end of the world is coming, so you must hurry!{C.n}"
         .format(C=C))
+    G.colony_name = colony_name
     G.Gamestate = 1
     G.rsm__("start")
 
@@ -98,13 +100,14 @@ def rsm__end():
     G.unlocked.remove("tick")
     G.hidden.remove("dev-give")
     G.hidden.remove("force-end")
+    G.colony_name = "NO COLONY"
 
 
 def rsm__tick():
     pass
 
 
-def rsm__init():
+def rsm__version():
     print("{C.b}builtin {C.custom[99]}v0.1.0{C.n}".format(C=C))
 
 #Initialize Function in Game

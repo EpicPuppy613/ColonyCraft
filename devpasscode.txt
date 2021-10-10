@@ -1,6 +1,0 @@
-notapasscode
-If you use this passcode, you are ruining the fun of the game. If you still want to, go ahead.
-ALL HIDDEN COMMANDS:
-dev-give
-dev-give-all
-force-end
