@@ -115,6 +115,10 @@ def rsm__autosave():
     print(C.g + "The game has been saved." + C.n)
 
 
+def rsm__version():
+    print(C.g + "saving system 1.0.0" + C.n)
+
+
 def rsm__init():
     autoslot = open("saves/autoname.name","r")
     autoname = autoslot.readline()

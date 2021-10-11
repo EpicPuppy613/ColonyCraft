@@ -103,12 +103,8 @@ def rsm__end():
     G.colony_name = "NO COLONY"
 
 
-def rsm__tick():
-    pass
-
-
 def rsm__version():
-    print("{C.b}builtin {C.custom[99]}v0.1.0{C.n}".format(C=C))
+    print("{C.b}builtin {C.custom[99]}v0.3.1{C.n}".format(C=C))
 
 #Initialize Function in Game
 

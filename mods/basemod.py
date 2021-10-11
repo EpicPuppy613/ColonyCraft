@@ -26,6 +26,7 @@ colony.modifier_health = 0
 colony.hapcolor = C.custom[0]
 colony.heacolor = C.custom[0]
 colony.ovecolor = C.custom[0]
+colony.rations = (1,1)
 colony.threshhold = [-1751, -1251, -501, 0, 500, 1250, 1750, 2000]
 colony.color = [88, 160, 202, 220, 190, 154, 119, 123]
 G.colony = colony
@@ -33,7 +34,8 @@ G.colony = colony
 
 #Tick Commands
 def population_update():
-    randdeath = randint(15, 25) / 100
+    heacalc = G.colony.health / 1000
+    randdeath = (randint(10, 20) / 100) * 2**(-heacalc)
     randage = randint(4, 15) / 100
     randgrow = randint(25, 40) / 100
     randborn = randint(20, 40) / 100
@@ -47,6 +49,119 @@ def population_update():
     G.colony.young -= round(G.colony.young * randgrow)
     print("{C.custom[85]}{} Babies have been born.".format(round(G.colony.adult * randborn * G.colony.modifier_health),C=C))
     G.colony.young += round(G.colony.adult * randborn * G.colony.modifier_health)
+
+
+def manual_ascend():
+    print(C.m+"ARE YOU REALLY SURE YOU WANT TO ASCEND? (Y/N)"+C.c)
+    confirmation = input(">")
+    if confirmation.lower() == "y":
+        force_ascend()
+    else:
+        print(C.custom[154] + "Returning to your colony..." + C.c)
+
+
+def force_ascend():
+    if G.colony.elder + G.colony.adult + G.colony.young < 100:
+        print(C.r+"Your colony didn't get big enough in order for you to be more experienced."+C.n)
+        G.rsm__("end")
+        return False
+    xp_gain = 0
+    xp_gain += G.colony.elder + G.colony.adult + G.colony.young
+    xp_gain += len(G.researched) * 10
+    xp_gain += len(G.evolved) * 10
+    print(C.custom[39] + "You gained {} xp points because of this colony.".format(xp_gain)+C.c)
+    G.stats.xp += xp_gain
+    levels = 0
+    skillgain = 0
+    talentgain = 0
+    while G.stats.xp > G.stats.lvlup:
+        levels += 1
+        G.stats.level += 1
+        G.stats.xp -= G.stats.lvlup
+        G.stats.lvlup = round(G.stats.lvlup*1.5)
+        G.stats.skillpts += 1
+        skillgain += 1
+        G.stats.talentpts += 1
+        talentgain += 1
+        if G.stats.level % 2 == 0:
+            G.stats.skillpts += 1
+            skillgain += 1
+    if levels > 0:
+        print(C.custom[51] + "You leveled up {} times! You gain {} skill points, and {} talent points".format(levels,skillgain,talentgain) + C.n)
+    G.rsm__("end")
+
+
+def colony_consume():
+    food_saturation = ((G.colony.young*0.5)+G.colony.adult+G.colony.elder)*colony.rations[0]
+    water_saturation = ((G.colony.young*0.5)+G.colony.adult+G.colony.elder)*colony.rations[0]
+    food_total = food_saturation
+    water_total = water_saturation
+    water_available = []
+    food_available = []
+    water_options = [[],[],[],[],[],[],[],[]]
+    food_options = [[],[],[],[],[],[],[],[]]
+    options_key = [8,7,6,5,4,3,2,1]
+    for category in G.inventory:
+        for item in G.inventory[category].items:
+            if isinstance(item, G.Liquid):
+                water_available.append(item)
+            if isinstance(item, G.Food):
+                food_available.append(item)
+    for food in food_available:
+        food_options[options_key.index(food.priority)].append(food)
+    for water in water_available:
+        water_options[options_key.index(water.priority)].append(water)
+    morale_change = 0
+    while food_saturation > 0:
+        for priority in food_options:
+            priority_count = 0
+            for item in priority:
+                priority_count+= item.count
+            if priority_count == 0:
+                continue
+            food_choice = randint(0,len(priority)-1)
+            if priority[food_choice].count == 0:
+                break
+            priority[food_choice].count -= 1
+            food_saturation -= priority[food_choice].saturation
+            morale_change += (priority[food_choice].saturation*priority[food_choice].enjoyment)/(food_total/10)
+            break
+        total_count = 0
+        for priority in food_options:
+            for item in priority:
+                total_count += item.count
+        if total_count == 0:
+            G.colony.health -= food_saturation
+            morale_change -= round(food_saturation)
+            print(C.r+"Your people are starving. Colony health decreased by {}%".format(round(food_saturation/10))+C.n)
+            break
+    while water_saturation > 0:
+        for priority in water_options:
+            priority_count = 0
+            for item in priority:
+                priority_count+= item.count
+            if priority_count == 0:
+                continue
+            water_choice = randint(0,len(priority)-1)
+            if priority[water_choice].count == 0:
+                break
+            priority[water_choice].count -= 1
+            water_saturation -= priority[water_choice].saturation
+            morale_change += (priority[water_choice].saturation*priority[water_choice].enjoyment)/(water_total/10)
+            break
+        total_count = 0
+        for priority in water_options:
+            for item in priority:
+                total_count += item.count
+        if total_count == 0:
+            G.colony.health -= 2 * water_saturation
+            morale_change -= round(water_saturation)
+            print(C.r+"Your people are thirsty. Colony health decreased by {}%".format(round(2*water_saturation/10))+C.n)
+            break
+    G.colony.morale += morale_change
+    print(C.c+"After food and liquids were consumed, {}% morale has been changed".format(round(morale_change/10))+C.n)
+    
+
 
 
 #Define all commands
@@ -130,6 +245,7 @@ def recalculate_wellness():
 
 
 def rsm__tick():
+    colony_consume()
     for category in G.inventory:
         for resource in G.inventory[category].items:
             resource.count = round(resource.count * G.storage_efficiency)
@@ -139,8 +255,9 @@ def rsm__tick():
     population_update()
     G.eotw -= 1
     if G.eotw <= 1:
-        print("{C.custom[196]}THE END OF THE WORLD IS HERE{C.n}".format(C=C))
-        G.stats.xp += G.colony.elder + G.colony.young + G.colony.adult
+        print("{C.custom[196]}THE END OF THE WORLD HAS COME{C.n}".format(C=C))
+        print(C.r + "You are forced to ascend to avoid the terrors of the end." + C.n)
+        force_ascend()
     elif G.eotw <= 5:
         print("{C.custom[203]}Your shamans are saying that the end of the world is coming.{C.n}".format(C=C))
 
@@ -188,6 +305,7 @@ G.register_command("colony", __name__, "check_colony")
 G.register_command("dev-give-all", __name__, "give_all_resources")
 G.register_command("dev-change-health", __name__ ,"dev_change_health")
 G.register_command("dev-change-morale", __name__, "dev_change_morale")
+G.register_command("ascend", __name__, "manual_ascend")
 
 #Create Resource CateGories
 G.inventory["food"] = G.Category("Food", [], "food")
@@ -208,11 +326,13 @@ G.inventory["food"].items.append(G.Food("Sushi", 0, "food", "sushi", 3, 2, 4))
 
 #Define Liquids
 G.inventory["liquid"].items.append(
-    G.Resource("Fresh Water", 0, "liquid", "water"))
+    G.Liquid("Fresh Water", 0, "liquid", "water", 2, 0, 3))
 G.inventory["liquid"].items.append(
     G.Resource("Salt Water", 0, "liquid", "sea-water"))
 G.inventory["liquid"].items.append(
-    G.Resource("Dirty Water", 0, "liquid", "mud-water"))
+    G.Liquid("Dirty Water", 0, "liquid", "mud-water", 1, -1, 2))
+G.inventory["liquid"].items.append(
+    G.Liquid("Disgusting Water", 0, "liquid", "bad-water", 1, -3, 1))
 
 #Define Resource
 G.inventory["resource"].items.append(
@@ -224,6 +344,7 @@ G.inventory["resource"].items.append(G.Resource("Rocks", 0, "resource",
 #Game Start Function
 def rsm__start():
     G.unlocked.append("colony")
+    G.unlocked.append("ascend")
     G.hidden.append("dev-give-all")
     G.hidden.append("dev-change-health")
     G.hidden.append("dev-change-morale")
@@ -232,13 +353,14 @@ def rsm__start():
     G.colony.elder = 2
     G.colony.morale = 0
     G.colony.health = 0
-    G.eotw = 20
+    G.eotw = 200
     recalculate_wellness()
 
 
 #Game End Function
 def rsm__end():
     G.unlocked.remove("colony")
+    G.unlocked.remove("ascend")
     G.hidden.remove("dev-give-all")
     G.hidden.remove("dev-change-health")
     G.hidden.remove("dev-change-morale")
@@ -254,5 +376,5 @@ def rsm__end():
 
 def rsm__version():
     release = "{C.custom[10]}basemod {C.custom[202]}ALPHA{C.n} ".format(C=C)
-    version = "0.3.0"
+    version = "0.3.1"
     print(release + version)

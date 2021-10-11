@@ -9,6 +9,7 @@ import time as t
 import builtin
 from mods import *
 import saving
+import app
 print("-------------")
 G.rsm__("init")
 t.sleep(0.2)

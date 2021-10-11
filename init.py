@@ -48,8 +48,14 @@ class Game:
         self.unlocked = []
         self.hidden = []
         self.inventory = {}
-        self.unlockables = []
-        self.unlocked = []
+        self.known = []
+        self.skills = []
+        self.learned = []
+        self.talents = []
+        self.researched = []
+        self.researches = []
+        self.evolved = []
+        self.traits = []
         """
         Gamestates
         0: Menu
@@ -58,7 +64,7 @@ class Game:
         self.gamestate = 0
     mods = []
     definitions = {}
-    version = "1.0.0"
+    version = "1.1.0"
     release = "{C.custom[204]}CORE{C.n} v".format(C=C)
     name = "{C.custom[51]}Colonycraft - CORE version 1{C.n}".format(
             C=C)
@@ -78,13 +84,20 @@ class Game:
             self.catid = catid
             self.resid = resid
 
-    class Food(Resource):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment,
-                     priority):
+    class Consumable(Resource):
+        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
             super().__init__(name, count, catid, resid)
             self.saturation = saturation
             self.enjoyment = enjoyment
             self.priority = priority
+
+    class Food(Consumable):
+        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
+            super().__init__(name, count, catid, resid, saturation, enjoyment, priority)
+
+    class Liquid(Consumable):
+        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
+            super().__init__(name, count, catid, resid, saturation, enjoyment, priority)
 
     class Unlockable:
         def __init__(self, name, desc, techid, cost, utype, reqids=[]):
@@ -137,8 +150,7 @@ class Game:
     def get_command(self):
         command = input(">")
         if not command in self.unlocked and not command in self.hidden:
-            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(
-                C=C))
+            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(C=C))
         else:
             self.run_command(command)
 

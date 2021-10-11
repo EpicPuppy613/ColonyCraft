@@ -33,3 +33,12 @@ To register a command use the function `G.register_command([command_name],__name
 - `rsm__t__[trait]` (optional) when a trait is obtained, [trait] will be the name of the trait
 - `rsm__s__[skill]` (optional) run once when a new colony starts, [skill] will be the name of the skill
 - `rsm__a__[talent]` (optional) run once when a new colony starts, [skill] will be the name of the skill
+
+### Unlockables
+
+Type | Unlocked | All
+----- | ----- | -----
+Skill | `known` | `skills`
+Talent | `learned` | `talents`
+Research | `researched` | `researches`
+Trait | `evolved` | `traits`

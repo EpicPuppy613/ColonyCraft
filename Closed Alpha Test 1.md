@@ -1,11 +1,15 @@
 ## TODO
 - [x] Colony Founding System
 - [x] Colony Reset System
+- [ ] Worker Assignment
+- [x] Colony Upkeep
 - [ ] Ascension
 - [ ] EOTW
 - [ ] Research
-- [ ] Skills
-- [ ] Traits
-- [ ] Talents
+    - [ ] Traits
+    - [ ] Talents
+    - [ ] Skills
 - [x] Saving
+    - [ ] Database Saving System
+        - [ ] User-Password pair
 - [x] Loading
