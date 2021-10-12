@@ -103,6 +103,10 @@ def rsm__end():
     G.colony_name = "NO COLONY"
 
 
+def rsm__init():
+    pass
+
+
 def rsm__version():
     print("{C.b}builtin {C.custom[99]}v0.3.1{C.n}".format(C=C))
 

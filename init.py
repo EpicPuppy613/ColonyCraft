@@ -1,4 +1,5 @@
 import sys, getpass
+from random import randint
 
 dev_file = open("devpasscode.pass", "r")
 dev_passcode = bytes.fromhex(dev_file.readline()).decode("utf-8")
@@ -84,6 +85,11 @@ class Game:
             self.catid = catid
             self.resid = resid
 
+    class Tool(Resource):
+        def __init__(self, name, count, used, catid, resid):
+            super().__init__(name, count, catid, resid)
+            self.used = used
+
     class Consumable(Resource):
         def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
             super().__init__(name, count, catid, resid)
@@ -109,6 +115,45 @@ class Game:
             self.type = utype
             if not self.type in ["r", "s", "t", "a"]:
                 raise Exception("Invalid Unlockable Type!")
+
+    class Job:
+        def __init__(self, name, jobid, count):
+            self.name = name
+            self.jobid = jobid
+            self.count = count
+
+
+    class LootTable:
+        def __init__(self, lootid, content):
+            self.lootid = lootid
+            self.content = content
+        def roll(self, count):
+            weight = 0
+            table = []
+            things = []
+            results = []
+            output = {}
+            for thing in self.content:
+                weight += thing.weight
+                table.append(weight)
+                things.append(thing)
+            for rolls in range(count):
+                roll = randint(1,weight)
+                for weight in range(len(table)):
+                    if roll <= table[weight]:
+                        results.append(results[weight])
+            for result in results:
+                if result.entry in output:
+                    output[result.entry] += result.count
+                else:
+                    output[result.entry] = result.count
+            return output
+
+    class LootEntry:
+        def __init__(self, entry, weight, count):
+            self.entry = entry
+            self.weight = weight
+            self.count = count
 
     class Empty:
         pass

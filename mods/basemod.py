@@ -23,13 +23,21 @@ colony.morale = 0
 colony.health = 0
 colony.modifier_work = 0
 colony.modifier_health = 0
+colony.workers = [0,0]
 colony.hapcolor = C.custom[0]
 colony.heacolor = C.custom[0]
 colony.ovecolor = C.custom[0]
-colony.rations = (1,1)
+colony.rations = [1,1]
 colony.threshhold = [-1751, -1251, -501, 0, 500, 1250, 1750, 2000]
 colony.color = [88, 160, 202, 220, 190, 154, 119, 123]
 G.colony = colony
+
+
+#Jobs Init
+jobs = G.Empty()
+jobs.all = {}
+jobs.unlocked = []
+G.jobs = jobs
 
 
 #Tick Commands
@@ -49,6 +57,7 @@ def population_update():
     G.colony.young -= round(G.colony.young * randgrow)
     print("{C.custom[85]}{} Babies have been born.".format(round(G.colony.adult * randborn * G.colony.modifier_health),C=C))
     G.colony.young += round(G.colony.adult * randborn * G.colony.modifier_health)
+    G.colony.workers[1] = G.colony.adult
 
 
 def manual_ascend():
@@ -87,7 +96,7 @@ def force_ascend():
             G.stats.skillpts += 1
             skillgain += 1
     if levels > 0:
-        print(C.custom[51] + "You leveled up {} times! You gain {} skill points, and {} talent points".format(levels,skillgain,talentgain) + C.n)
+        print(C.custom[51] + "You leveled up {} times! You gain {} skill points and {} talent points".format(levels,skillgain,talentgain) + C.n)
     G.rsm__("end")
 
 
@@ -191,10 +200,6 @@ def check_colony():
                 G=G))
 
 
-def save():
-    pass
-
-
 def give_all_resources():
     if G.enter_dev_pass():
         pass
@@ -243,6 +248,71 @@ def recalculate_wellness():
     G.colony.heacolor = C.custom[heaval]
     G.colony.ovecolor = C.custom[oveval]
 
+
+def job_management():
+    print("What job do you want to manage?\n{C.r}[0] Cancel{C.n}".format(C=C))
+    for job in G.jobs.unlocked:
+        print("[{}] {} - {} Current Workers".format(G.jobs.unlocked.index(job)+1,job.name,job.count))
+    while True:
+        try:
+            choice = int(input(">"))
+            if choice != 0:
+                selection = G.jobs.unlocked[choice-1]
+            break
+        except:
+            print(C.r+"Invalid Selection"+C.n)
+            continue
+    if choice == 0:
+        print(C.r+"Canceled"+C.n)
+        return False
+    while True:
+        print("Do you want to assign(a) or unassign(u) workers?")
+        action = input(">").lower()
+        if action != "a" and action != "u":
+            print(C.r+"Thats not a valid selection"+C.n)
+            continue
+        break
+    if action == "a":
+        print(C.c+"You have {}/{} workers currently assigned.\nHow many do you want to assign (0 = cancel)?".format(G.colony.workers[0],G.colony.workers[1])+C.n)
+        while True:
+            try:
+                amount = int(input(">"))
+            except:
+                print(C.r+"Invalid number"+C.n)
+                continue
+            if amount == 0:
+                print(C.r+"Canceled"+C.n)
+                return False
+            elif amount > G.colony.workers[1]-G.colony.workers[0]:
+                print(C.r+"You don't have enough workers"+C.n)
+                continue
+            else:
+                break
+        selection.count += amount
+        G.colony.workers[0] += amount
+        print(C.g + "Assigned Workers" + C.n)
+        return True
+    elif action == "u":
+        print(C.m+"You have {} workers currently assigned to that job.\nHow many do you want to unassign (0 = cancel)?".format(selection.count)+C.n)
+        while True:
+            try:
+                amount = int(input(">"))
+            except:
+                print(C.r+"Invalid Number"+C.n)
+                continue
+            if amount == 0:
+                print(C.r+"Canceled"+C.n)
+                return False
+            elif amount > selection.count:
+                print(C.r+"You don't have that many workers assigned to that job"+C.n)
+                continue
+            else:
+                break
+        selection.count -= amount
+        G.colony.workers[0] -= amount
+        print(C.g + "Unassigned Workers" + C.n)
+        return True
+    
 
 def rsm__tick():
     colony_consume()
@@ -301,48 +371,63 @@ def dev_change_morale():
 
 #Initialize all commands
 G.register_command("stats", __name__, "get_stats", True)
+G.register_command("jobs", __name__, "job_management")
 G.register_command("colony", __name__, "check_colony")
 G.register_command("dev-give-all", __name__, "give_all_resources")
 G.register_command("dev-change-health", __name__ ,"dev_change_health")
 G.register_command("dev-change-morale", __name__, "dev_change_morale")
 G.register_command("ascend", __name__, "manual_ascend")
 
+#Initialize jobs
+G.jobs.all["gatherer"] = G.Job(C.custom[46]+"Gatherer"+C.n,"gatherer",0)
+G.jobs.all["woodcutter"] = G.Job(C.custom[46]+"Woodcutter"+C.n,"woodcutter",0)
+G.jobs.all["digger"] = G.Job(C.custom[46]+"Digger"+C.n,"digger",0)
+G.jobs.all["thinker"] = G.Job(C.custom[87]+"Thinker"+C.n,"thinker",0)
+G.jobs.all["inventor"] = G.Job(C.custom[87]+"Inventor"+C.n,"inventor",0)
+G.jobs.all["scientist"] = G.Job(C.custom[87]+"Scientist"+C.n,"scientist",0)
+G.jobs.all["crafter"] = G.Job(C.custom[226]+"Crafter"+C.n,"crafter",0)
+G.jobs.all["toolmaker"] = G.Job(C.custom[226]+"Toolmaker"+C.n,"toolmaker",0)
+G.jobs.all["carpenter"] = G.Job(C.custom[226]+"Carpenter"+C.n,"carpenter",0)
+G.jobs.all["blacksmith"] = G.Job(C.custom[226]+"Blacksmith"+C.n,"blacksmith",0)
+
 #Create Resource CateGories
 G.inventory["food"] = G.Category("Food", [], "food")
 G.inventory["liquid"] = G.Category("Liquids", [], "liquid")
-G.inventory["resource"] = G.Category("Resources", [], "resource")
+G.inventory["primitive"] = G.Category("Primitive Resources", [], "primitive")
+G.inventory["equipment"] = G.Category("Equipment", [], "equipment")
 
 #Define Food
+G.inventory["food"].items.append(G.Food("Wild Vegetation", 0, "food", "wild-greens", 1, 0, 2))
+G.inventory["food"].items.append(G.Food("Grown Vegetation", 0, "food", "grown-greens", 2,1, 3))
 G.inventory["food"].items.append(G.Food("Fruit", 0, "food", "fruit", 2, 1, 3))
-G.inventory["food"].items.append(
-    G.Food("Raw Meat", 0, "food", "raw-meat", 2, -2, 2))
-G.inventory["food"].items.append(
-    G.Food("Cooked Meat", 0, "food", "cooked-meat", 4, 3, 4))
-G.inventory["food"].items.append(
-    G.Food("Raw Seafood", 0, "food", "raw-fish", 2, -2, 2))
-G.inventory["food"].items.append(
-    G.Food("Cooked Seafood", 0, "food", "cooked-fish", 3, 3, 4))
+G.inventory["food"].items.append(G.Food("Raw Meat", 0, "food", "raw-meat", 2, -2, 1))
+G.inventory["food"].items.append(G.Food("Cooked Meat", 0, "food", "cooked-meat", 4, 3, 4))
+G.inventory["food"].items.append(G.Food("Raw Seafood", 0, "food", "raw-fish", 2, -2, 1))
+G.inventory["food"].items.append(G.Food("Cooked Seafood", 0, "food", "cooked-fish", 3, 3, 4))
 G.inventory["food"].items.append(G.Food("Sushi", 0, "food", "sushi", 3, 2, 4))
 
 #Define Liquids
-G.inventory["liquid"].items.append(
-    G.Liquid("Fresh Water", 0, "liquid", "water", 2, 0, 3))
-G.inventory["liquid"].items.append(
-    G.Resource("Salt Water", 0, "liquid", "sea-water"))
-G.inventory["liquid"].items.append(
-    G.Liquid("Dirty Water", 0, "liquid", "mud-water", 1, -1, 2))
-G.inventory["liquid"].items.append(
-    G.Liquid("Disgusting Water", 0, "liquid", "bad-water", 1, -3, 1))
+G.inventory["liquid"].items.append(G.Liquid("Fresh Water", 0, "liquid", "water", 2, 0, 3))
+G.inventory["liquid"].items.append(G.Resource("Salt Water", 0, "liquid", "sea-water"))
+G.inventory["liquid"].items.append(G.Liquid("Dirty Water", 0, "liquid", "mud-water", 1, -1, 2))
+G.inventory["liquid"].items.append(G.Liquid("Disgusting Water", 0, "liquid", "bad-water", 1, -3, 1))
+G.inventory["liquid"].items.append(G.Liquid("Fruit Juice", 0, "liquid", "juice", 3, 2, 4))
 
-#Define Resource
-G.inventory["resource"].items.append(
-    G.Resource("Sticks", 0, "resource", "stick"))
-G.inventory["resource"].items.append(G.Resource("Rocks", 0, "resource",
-                                                "rock"))
+#Define Primitive Resources
+G.inventory["primitive"].items.append(G.Resource("Sticks", 0, "primitive", "sticks"))
+G.inventory["primitive"].items.append(G.Resource("Rocks", 0, "primitive", "rocks"))
+G.inventory["primitive"].items.append(G.Resource("Leaves", 0, "primitive", "leaves"))
+G.inventory["primitive"].items.append(G.Resource("Logs", 0, "primitive", "logs"))
+G.inventory["primitive"].items.append(G.Resource("Clay", 0, "primitive", "clay"))
+G.inventory["primitive"].items.append(G.Resource("Mud", 0, "primitive", "mud"))
 
+#Define Equipment
+G.inventory["equipment"].items.append(G.Tool("Sharp Rocks", 0, 0, "equipment", "sharp-rocks"))
+G.inventory["equipment"].items.append(G.Tool("Primitive Tools", 0, 0, "equipment", "primitive-tools"))
 
 #Game Start Function
 def rsm__start():
+    G.unlocked.append("jobs")
     G.unlocked.append("colony")
     G.unlocked.append("ascend")
     G.hidden.append("dev-give-all")
@@ -353,12 +438,20 @@ def rsm__start():
     G.colony.elder = 2
     G.colony.morale = 0
     G.colony.health = 0
+    G.colony.workers[1] = G.colony.adult
+    G.jobs.unlocked.append(G.jobs.all["gatherer"])
+    G.jobs.unlocked.append(G.jobs.all["thinker"])
     G.eotw = 200
     recalculate_wellness()
 
 
+def rsm__init():
+    pass
+
+
 #Game End Function
 def rsm__end():
+    G.unlocked.remove("jobs")
     G.unlocked.remove("colony")
     G.unlocked.remove("ascend")
     G.hidden.remove("dev-give-all")
@@ -372,9 +465,16 @@ def rsm__end():
     G.colony.modifier_work = 0
     G.colony.modifier_health = 0
     G.eotw = 0
+    G.jobs.unlocked = []
+    for category in G.inventory:
+        for resource in G.inventory[category].items:
+            resource.count = 0
+    for job in G.jobs.all:
+        job.count = 0
+    G.colony.workers[0] = 0
 
 
 def rsm__version():
     release = "{C.custom[10]}basemod {C.custom[202]}ALPHA{C.n} ".format(C=C)
-    version = "0.3.1"
+    version = "0.4.0"
     print(release + version)

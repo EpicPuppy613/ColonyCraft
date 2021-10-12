@@ -13,16 +13,43 @@
 - [x] Core OS System
   - [x] Dev cheats ( ͡° ͜ʖ ͡°)
 - [ ] Core game mechanics 
-  - [ ] Worker management
+  - [x] Worker management
   - [ ] Research & traits
     - [ ] Research tree
     - [ ] Trait tree
-  - [ ] Happiness & health
+  - [x] Happiness & health
   - [ ] Random events
-    - [ ] EOTW
-- [ ] Goin on "runs"/new colony -> gain legacy xp
-  - [ ] Lose everything at end of a "run" aka "ascending"
-- [ ] Level up and gain skill & talent points
+    - [x] EOTW
+- [x] Goin on "runs"/new colony -> gain legacy xp
+  - [x] Lose everything at end of a "run" aka "ascending"
+- [x] Level up and gain skill & talent points
   - [ ] Skill tree
   - [ ] Talent tree
 - [x] Modding framework
+
+### Research System
+Several types of research points:
+- Invention - Thinkers, Inventors
+- Science - Experimenters, Scientists
+- Chemestry - Chemists, Labs
+- Math - Mathematicians, Supercomputers
+- Space - Astronomer, Space Telescope
+
+Research requires x of certain types of research
+
+Researchers produce respective type of research points.
+
+Research completes when all required research points have been fulfilled
+
+### Crafting System
+Sever types of crafting effort:
+- Standard - Crafters, Factory
+- Tool - Toolmakers, Blacksmith, Factory
+- Woodworking - Carver, Carpenter, Factory
+- Metalworking - Smelter, Blacksmith, Factory
+
+Crafting requires x of certain types of crafting effort
+
+Crafters produce respective type of crafting effort
+
+Crafting completes when all required crafting effort has been fulfilled
