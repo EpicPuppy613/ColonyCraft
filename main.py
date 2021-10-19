@@ -9,8 +9,8 @@ import time as t
 import builtin
 from mods import *
 import saving
-print("-------------")
 G.rsm__("init")
+print("-------------")
 t.sleep(0.2)
 print(G.short) 
 G.rsm__("version")
