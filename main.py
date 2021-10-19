@@ -15,3 +15,4 @@ G.rsm__("version")
 print(G.release + G.version)
 while True:
     G.get_command()
+    

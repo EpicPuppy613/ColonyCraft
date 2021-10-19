@@ -125,3 +125,4 @@ def rsm__init():
     autoslot.close()
     if autoname != "Empty":
         print(C.m + "You have a game saved in the autosave slot! Use 'load' to load it." + C.n)
+        
