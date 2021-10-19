@@ -4,6 +4,7 @@ import sys
 G.initialize_mod(__name__)
 G.colony_name = "NO COLONY"
 
+
 #Define Functions
 def command_help():
     print("{C.b}Available Commands{C.n}".format(C=C))
@@ -109,6 +110,7 @@ def rsm__init():
 
 def rsm__version():
     print("{C.b}builtin {C.custom[99]}v0.3.1{C.n}".format(C=C))
+
 
 #Initialize Function in Game
 

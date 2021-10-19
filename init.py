@@ -63,15 +63,14 @@ class Game:
         1: During run
         """
         self.gamestate = 0
+
     event_blacklist = []
     mods = []
     definitions = {}
     version = "1.2.0"
     release = "{C.custom[204]}CORE{C.n} v".format(C=C)
-    name = "{C.custom[51]}Colonycraft - CORE version 1{C.n}".format(
-            C=C)
+    name = "{C.custom[51]}Colonycraft - CORE version 1{C.n}".format(C=C)
     short = "{C.custom[51]}CC - v1{C.n}".format(C=C)
-
 
     class Category:
         def __init__(self, name, items, catid):
@@ -92,19 +91,24 @@ class Game:
             self.used = used
 
     class Consumable(Resource):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
+        def __init__(self, name, count, catid, resid, saturation, enjoyment,
+                     priority):
             super().__init__(name, count, catid, resid)
             self.saturation = saturation
             self.enjoyment = enjoyment
             self.priority = priority
 
     class Food(Consumable):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
-            super().__init__(name, count, catid, resid, saturation, enjoyment, priority)
+        def __init__(self, name, count, catid, resid, saturation, enjoyment,
+                     priority):
+            super().__init__(name, count, catid, resid, saturation, enjoyment,
+                             priority)
 
     class Liquid(Consumable):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment, priority):
-            super().__init__(name, count, catid, resid, saturation, enjoyment, priority)
+        def __init__(self, name, count, catid, resid, saturation, enjoyment,
+                     priority):
+            super().__init__(name, count, catid, resid, saturation, enjoyment,
+                             priority)
 
     class Unlockable:
         def __init__(self, name, desc, techid, cost, utype, reqids=[]):
@@ -118,7 +122,16 @@ class Game:
                 raise Exception("Invalid Unlockable Type!")
 
     class Technology(Unlockable):
-        def __init__(self, name, desc, techid, invention, math, science, aerospace, eventname, reqids=[]):
+        def __init__(self,
+                     name,
+                     desc,
+                     techid,
+                     invention,
+                     math,
+                     science,
+                     aerospace,
+                     eventname,
+                     reqids=[]):
             self.name = name
             self.desc = desc
             self.techid = techid
@@ -127,16 +140,18 @@ class Game:
             self.science = science
             self.aerospace = aerospace
             if "-" in eventname:
-                raise(Exception("'-' cannot be used in a event name"))
+                raise (Exception("'-' cannot be used in a event name"))
             self.eventname = eventname
             self.cost = [invention, math, science, aerospace]
             self.reqids = reqids
+
         def researchable(self):
             if G.ADV_DEBUG:
                 print("Checking technology " + self.techid)
             if len(self.reqids) == 0:
                 if G.ADV_DEBUG:
-                    print(C.g+"Technology " + self.techid + " VALID (requirements = 0)"+C.n)
+                    print(C.g + "Technology " + self.techid +
+                          " VALID (requirements = 0)" + C.n)
                 return True
             status = True
             for req in self.reqids:
@@ -146,17 +161,19 @@ class Game:
                         obtained = True
                 if obtained == False:
                     if G.ADV_DEBUG:
-                        print(C.r+"Technology " + self.techid + " INVALID (missing requirement)"+C.n)
+                        print(C.r + "Technology " + self.techid +
+                              " INVALID (missing requirement)" + C.n)
                     return False
                 status = True
             if status:
                 if G.ADV_DEBUG:
-                    print(C.g+"Technology " + self.techid + " VALID (requirements met)"+C.n)
+                    print(C.g + "Technology " + self.techid +
+                          " VALID (requirements met)" + C.n)
                 return True
             if G.ADV_DEBUG:
-                print(C.r+"Technology " + self.techid + " INVALID (unknown reason)"+C.n)
+                print(C.r + "Technology " + self.techid +
+                      " INVALID (unknown reason)" + C.n)
             return False
-            
 
     class Job:
         def __init__(self, name, jobid, count):
@@ -164,11 +181,11 @@ class Game:
             self.jobid = jobid
             self.count = count
 
-
     class LootTable:
         def __init__(self, lootid, content):
             self.lootid = lootid
             self.content = content
+
         def roll(self, count):
             total_weight = 0
             table = []
@@ -180,7 +197,7 @@ class Game:
                 table.append(total_weight)
                 things.append(thing)
             for rolls in range(count):
-                roll = randint(1,total_weight)
+                roll = randint(1, total_weight)
                 for weight in range(len(table)):
                     if roll <= table[weight]:
                         results.append(things[weight])
@@ -201,15 +218,19 @@ class Game:
     class Empty:
         pass
 
-    def inventory_lookup(self,item):
+    def inventory_lookup(self, item):
         for category in self.inventory:
             for entry in self.inventory[category].items:
                 if entry.resid == item:
                     return entry
         raise Exception("Item id does not exist")
 
-
-    def register_command(self, command, mod, function, unlocked=False, hidden=False):
+    def register_command(self,
+                         command,
+                         mod,
+                         function,
+                         unlocked=False,
+                         hidden=False):
         self.commands.append(command)
         if unlocked:
             self.unlocked.append(command)
@@ -241,7 +262,8 @@ class Game:
     def get_command(self):
         command = input(">")
         if not command in self.unlocked and not command in self.hidden:
-            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(C=C))
+            print("{C.y}Unreconized command, try 'help' for help{C.n}".format(
+                C=C))
         else:
             self.run_command(command)
 
@@ -268,15 +290,18 @@ class Game:
     #Events
     DEBUG = True
     ADV_DEBUG = False
+
     def rsm__(self, event):
         for mod in self.mods:
             try:
                 if self.ADV_DEBUG:
-                    print("DEBUG: Calling event 'rsm__" + event + "' in module '" + mod + "'")
+                    print("DEBUG: Calling event 'rsm__" + event +
+                          "' in module '" + mod + "'")
                 getattr(sys.modules[mod], "rsm__" + event)()
             except AttributeError:
                 if self.ADV_DEBUG:
-                    print(C.r+"DEBUG: Event 'rsm__" + event + "' doesn't exist in module '" + mod + "'"+C.n)
+                    print(C.r + "DEBUG: Event 'rsm__" + event +
+                          "' doesn't exist in module '" + mod + "'" + C.n)
                 pass
             except BaseException as err:
                 if self.DEBUG:
@@ -286,5 +311,6 @@ class Game:
                 if entry in event:
                     return False
             sys.modules["saving"].rsm__autosave()
+
 
 G = Game()
