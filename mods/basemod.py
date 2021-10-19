@@ -7,7 +7,7 @@ G.initialize_mod(__name__)
 #Tick Commands
 def gatherer_update():
     for category in G.inventory:
-        for entry in G.inventory[category]:
+        for entry in G.inventory[category].items:
             if isinstance(entry,G.Tool):
                 entry.used = 0
     G.inventory_lookup("fire").used += G.jobs.all["firemaker"].count
@@ -23,6 +23,13 @@ def gatherer_update():
     gatherer_output = G.loot_tables["fisher"].roll(round(G.jobs.all["fisher"].count*3*G.colony.modifier_work))
     for thing in gatherer_output:
         G.inventory_lookup(thing).count += gatherer_output[thing]
+    firemaker_output = round(G.jobs.all["firemaker"].count*2*G.colony.modifier_work)
+    for fire in range(firemaker_output):
+        if G.inventory_lookup("sticks").count >= 10:
+            G.inventory_lookup("sticks").count -= 10
+            G.inventory_lookup("fire").count += 1
+        else:
+            break
     smoker_output = round(G.jobs.all["smoker"].count*10*G.colony.modifier_work)
     if G.inventory_lookup("fire").used > G.inventory_lookup("fire").count:
         smoker_output -= 10 * (G.inventory_lookup("fire").used - G.inventory_lookup("fire").count)
