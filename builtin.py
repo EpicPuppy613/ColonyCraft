@@ -1,5 +1,4 @@
-from init import G, C
-import sys
+from init import G, C, enter_dev_pass
 
 G.initialize_mod(__name__)
 G.colony_name = "NO COLONY"
@@ -17,10 +16,6 @@ def get_version():
     G.rsm__("version")
 
 
-def exit():
-    sys.exit()
-
-
 def show_inventory():
     for category in G.inventory:
         category = G.inventory[category]
@@ -34,7 +29,7 @@ def show_inventory():
 
 
 def give_resource():
-    if not G.enter_dev_pass():
+    if not enter_dev_pass():
         return False
     print("RESOURCE ID TO GIVE:\n>", end="")
     item_entry = input()
@@ -45,7 +40,7 @@ def give_resource():
                 print("AMOUNT TO GIVE:\n>", end="")
                 try:
                     item_count = int(input())
-                except:
+                except BaseException:
                     print("{C.r}NOT A NUMBER{C.n}".format(C=C))
                     return False
                 category.items[item].count += item_count
@@ -116,7 +111,7 @@ def rsm__version():
 
 G.register_command("help", __name__, "command_help", True)
 G.register_command("version", __name__, "get_version", True)
-G.register_command("quit", __name__, "exit", True)
+G.register_command("quit", "sys", "exit", True)
 G.register_command("begin", __name__, "start_colony", True)
 G.register_command("inv", __name__, "show_inventory")
 G.register_command("inventory", __name__, "show_inventory")

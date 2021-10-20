@@ -1,11 +1,33 @@
 #Import Game instance
-from init import G, C
+from init import G, C, gen_bar, enter_dev_pass
 from random import randint
 
 G.initialize_mod(__name__)
 
 
 #Tick Commands
+def production_update():
+    firemaker_output = round(G.jobs.all["firemaker"].count * 2 *
+                             G.colony.modifier_work)
+    for _ in range(firemaker_output):
+        if G.inventory_lookup("sticks").count >= 10:
+            G.inventory_lookup("sticks").count -= 10
+            G.inventory_lookup("fire").count += 1
+        else:
+            break
+    smoker_output = round(G.jobs.all["smoker"].count * 10 *
+                          G.colony.modifier_work)
+    if G.inventory_lookup("fire").used > G.inventory_lookup("fire").count:
+        smoker_output -= 10 * (G.inventory_lookup("fire").used -
+                               G.inventory_lookup("fire").count)
+    if smoker_output > 0:
+        seafood_cooked = smoker_output
+        if seafood_cooked > G.inventory_lookup("raw-fish").count:
+            seafood_cooked = G.inventory_lookup("raw-fish").count
+        G.inventory_lookup("raw-fish").count -= seafood_cooked
+        G.inventory_lookup("cooked-fish").count += seafood_cooked
+
+
 def gatherer_update():
     for category in G.inventory:
         for entry in G.inventory[category].items:
@@ -28,25 +50,7 @@ def gatherer_update():
         round(G.jobs.all["fisher"].count * 3 * G.colony.modifier_work))
     for thing in gatherer_output:
         G.inventory_lookup(thing).count += gatherer_output[thing]
-    firemaker_output = round(G.jobs.all["firemaker"].count * 2 *
-                             G.colony.modifier_work)
-    for fire in range(firemaker_output):
-        if G.inventory_lookup("sticks").count >= 10:
-            G.inventory_lookup("sticks").count -= 10
-            G.inventory_lookup("fire").count += 1
-        else:
-            break
-    smoker_output = round(G.jobs.all["smoker"].count * 10 *
-                          G.colony.modifier_work)
-    if G.inventory_lookup("fire").used > G.inventory_lookup("fire").count:
-        smoker_output -= 10 * (G.inventory_lookup("fire").used -
-                               G.inventory_lookup("fire").count)
-    if smoker_output > 0:
-        seafood_cooked = smoker_output
-        if seafood_cooked > G.inventory_lookup("raw-fish").count:
-            seafood_cooked = G.inventory_lookup("raw-fish").count
-        G.inventory_lookup("raw-fish").count -= seafood_cooked
-        G.inventory_lookup("cooked-fish").count += seafood_cooked
+    production_update()
 
 
 def show_research():
@@ -54,23 +58,23 @@ def show_research():
     if G.research.needed.invention > 0:
         print(C.custom[27] + "Invention: {}/{} {}".format(
             G.research.progress.invention, G.research.needed.invention,
-            G.gen_bar(G.research.progress.invention,
+            gen_bar(G.research.progress.invention,
                       G.research.needed.invention, 20)) + C.n)
     if G.research.needed.science > 0:
         print(C.custom[83] + "Science: {}/{} {}".format(
             G.research.progress.science, G.research.needed.science,
-            G.gen_bar(G.research.progress.science, G.research.needed.science,
+            gen_bar(G.research.progress.science, G.research.needed.science,
                       20)) + C.n)
     if G.research.needed.math > 0:
         print(C.custom[208] + "Math: {}/{} {}".format(
             G.research.progress.math, G.research.needed.math,
-            G.gen_bar(G.research.progress.math, G.research.needed.math, 20)) +
+            gen_bar(G.research.progress.math, G.research.needed.math, 20)) +
               C.n)
     if G.research.needed.aerospace > 0:
         print(C.custom[159] + "Aerospace: {}/{} {}".format(
             G.research.progress.aerospace, G.research.needed.aerospace,
-            G.gen_bar(G.research.progress.aerospace,
-                      G.research.needed.aerospace, 20)) + C.n)
+            gen_bar(G.research.progress.aerospace,
+                      G.research.needed.aerospace)) + C.n)
 
 
 def research_update():
@@ -112,6 +116,7 @@ def research_update():
         G.research.current = None
         return True
     show_research()
+    return True
 
 
 def population_update():
@@ -142,63 +147,7 @@ def population_update():
     G.colony.workers[1] = G.colony.adult
 
 
-def research_management():
-    print(
-        C.custom[118] +
-        "What do you want to do?\n{C.r}[0] Cancel\n{C.custom[196]}[1] Stop Research\n{C.custom[80]}[2] Pick New Research\n{C.custom[86]}[3] Review Research Progress\n{C.custom[123]}[4] Review Researched Technologies"
-        .format(C=C) + C.n)
-    while True:
-        try:
-            choice = int(input(">"))
-            if choice < 0 or choice > 4:
-                print(C.r + "That's not a valid choice." + C.n)
-                continue
-            break
-        except:
-            print(C.r + "That's not a valid number." + C.n)
-            continue
-    if choice == 3:
-        if G.research.current == None:
-            print(C.r + "You don't have an active research" + C.n)
-            return False
-        else:
-            show_research()
-            return True
-    elif choice == 4:
-        print(C.c + "Researched Technologies:" + C.n)
-        for technology in G.researched:
-            print(technology.name + " - '" + technology.desc + "'")
-        return True
-    elif choice == 0:
-        print(C.r + "Cancelled" + C.c)
-        return False
-    elif choice == 1:
-        print(
-            C.m +
-            "Are you sure you want to cancel your research? (You will lose all research progress) [Y/N]"
-            + C.n)
-        confirmation = input(">")
-        if confirmation.lower() == "y":
-            G.research.needed.invention = 0
-            G.research.needed.math = 0
-            G.research.needed.science = 0
-            G.research.needed.aerospace = 0
-            G.research.progress.invention = 0
-            G.research.progress.math = 0
-            G.research.progress.science = 0
-            G.research.progress.aerospace = 0
-            G.research.current = None
-            print(C.r + "The current research has been cleared." + C.c)
-            return False
-        else:
-            print(C.custom[154] + "Returning to your colony..." + C.n)
-            return False
-    if G.research.current != None:
-        print(
-            C.c +
-            "You already have an active research. Make sure to cancel it first."
-            + C.n)
-        return False
+def research_choice():
     position = 0
     options = []
     for technology in G.researches:
@@ -221,7 +170,7 @@ def research_management():
                 print(C.r + "That's not a valid choice." + C.n)
                 continue
             break
-        except:
+        except BaseException:
             print(C.r + "That's not a valid number." + C.n)
             continue
     new_research = options[choice]
@@ -236,6 +185,62 @@ def research_management():
     G.research.progress.aerospace = 0
     print(C.g + "Set new research." + C.n)
     return True
+
+
+def research_management():
+    print(
+        C.custom[118] +
+        "What do you want to do?\n{C.r}[0] Cancel\n{C.custom[196]}[1] Stop Research\n{C.custom[80]}[2] Pick New Research\n{C.custom[86]}[3] Review Research Progress\n{C.custom[123]}[4] Review Researched Technologies"
+        .format(C=C) + C.n)
+    while True:
+        try:
+            choice = int(input(">"))
+            if choice < 0 or choice > 4:
+                print(C.r + "That's not a valid choice." + C.n)
+                continue
+            break
+        except BaseException:
+            print(C.r + "That's not a valid number." + C.n)
+            continue
+    if choice == 3:
+        if G.research.current == None:
+            print(C.r + "You don't have an active research" + C.n)
+            return False
+        show_research()
+        return True
+    if choice == 4:
+        print(C.c + "Researched Technologies:" + C.n)
+        for technology in G.researched:
+            print(technology.name + " - '" + technology.desc + "'")
+        return True
+    if choice == 0:
+        print(C.r + "Cancelled" + C.c)
+        return False
+    if choice == 1:
+        print(
+            C.m +
+            "Are you sure you want to cancel your research? (You will lose all research progress) [Y/N]"
+            + C.n)
+        confirmation = input(">")
+        if confirmation.lower() == "y":
+            G.research.needed.invention = 0
+            G.research.needed.math = 0
+            G.research.needed.science = 0
+            G.research.needed.aerospace = 0
+            G.research.progress.invention = 0
+            G.research.progress.math = 0
+            G.research.progress.science = 0
+            G.research.progress.aerospace = 0
+            G.research.current = None
+        print(C.custom[154] + "Returning to your colony..." + C.n)
+        return False
+    if G.research.current != None:
+        print(
+            C.c +
+            "You already have an active research. Make sure to cancel it first."
+            + C.n)
+        return False
+    research_choice()
 
 
 def manual_ascend():
@@ -286,35 +291,27 @@ def force_ascend():
     G.rsm__("end")
 
 
-def colony_consume():
+def food_consume():
     food_saturation = ((G.colony.young * 0.5) + G.colony.adult +
                        G.colony.elder) * G.colony.rations[0]
-    water_saturation = ((G.colony.young * 0.5) + G.colony.adult +
-                        G.colony.elder) * G.colony.rations[0]
     food_total = food_saturation
-    water_total = water_saturation
-    water_available = []
     food_available = []
-    water_options = [[], [], [], [], [], [], [], []]
     food_options = [[], [], [], [], [], [], [], []]
     options_key = [8, 7, 6, 5, 4, 3, 2, 1]
     for category in G.inventory:
         for item in G.inventory[category].items:
-            if isinstance(item, G.Liquid):
-                water_available.append(item)
-            if isinstance(item, G.Food):
-                food_available.append(item)
+            if isinstance(item, G.Consumable):
+                if item.itemtype == "food":
+                    food_available.append(item)
     for food in food_available:
         food_options[options_key.index(food.priority)].append(food)
-    for water in water_available:
-        water_options[options_key.index(water.priority)].append(water)
     morale_change = 0
     while food_saturation > 0:
+        total_count = 0
         for priority in food_options:
-            priority_count = 0
             for item in priority:
-                priority_count += item.count
-            if priority_count == 0:
+                total_count += item.count
+            if total_count == 0:
                 continue
             food_choice = randint(0, len(priority) - 1)
             if priority[food_choice].count == 0:
@@ -325,10 +322,6 @@ def colony_consume():
                               priority[food_choice].enjoyment) / (food_total /
                                                                   10)
             break
-        total_count = 0
-        for priority in food_options:
-            for item in priority:
-                total_count += item.count
         if total_count == 0:
             G.colony.health -= food_saturation
             morale_change -= round(food_saturation)
@@ -336,12 +329,33 @@ def colony_consume():
                   "Your people are starving. Colony health decreased by {}%".
                   format(round(food_saturation / 10)) + C.n)
             break
+    G.colony.morale += morale_change
+    print(C.c +
+          "After food was consumed, {}% morale has been changed".
+          format(round(morale_change / 10)) + C.n)
+
+
+def liquid_consume():
+    water_saturation = ((G.colony.young * 0.5) + G.colony.adult +
+                        G.colony.elder) * G.colony.rations[0]
+    water_total = water_saturation
+    water_available = []
+    water_options = [[], [], [], [], [], [], [], []]
+    options_key = [8, 7, 6, 5, 4, 3, 2, 1]
+    for category in G.inventory:
+        for item in G.inventory[category].items:
+            if isinstance(item, G.Consumable):
+                if item.itemtype == "liquid":
+                    water_available.append(item)
+    for water in water_available:
+        water_options[options_key.index(water.priority)].append(water)
+    morale_change = 0
     while water_saturation > 0:
+        total_count = 0
         for priority in water_options:
-            priority_count = 0
             for item in priority:
-                priority_count += item.count
-            if priority_count == 0:
+                total_count += item.count
+            if total_count == 0:
                 continue
             water_choice = randint(0, len(priority) - 1)
             if priority[water_choice].count == 0:
@@ -352,10 +366,6 @@ def colony_consume():
                               priority[water_choice].enjoyment) / (
                                   water_total / 10)
             break
-        total_count = 0
-        for priority in water_options:
-            for item in priority:
-                total_count += item.count
         if total_count == 0:
             G.colony.health -= 2 * water_saturation
             morale_change -= round(water_saturation)
@@ -365,7 +375,7 @@ def colony_consume():
             break
     G.colony.morale += morale_change
     print(C.c +
-          "After food and liquids were consumed, {}% morale has been changed".
+          "After liquids were consumed, {}% morale has been changed".
           format(round(morale_change / 10)) + C.n)
 
 
@@ -376,7 +386,7 @@ def get_stats():
         .format(G.stats.level,
                 G.stats.xp,
                 G.stats.lvlup,
-                G.gen_bar(G.stats.xp, G.stats.lvlup, 20),
+                gen_bar(G.stats.xp, G.stats.lvlup, 20),
                 G.stats.skillpts,
                 G.stats.talentpts,
                 C=C))
@@ -397,7 +407,7 @@ def check_colony():
 
 
 def give_all_resources():
-    if G.enter_dev_pass():
+    if enter_dev_pass():
         pass
     else:
         return False
@@ -409,7 +419,7 @@ def give_all_resources():
                 resource.count += resource_count
         print(C.g + "RESOURCES ADDED" + C.n)
         return True
-    except:
+    except BaseException:
         print(C.r + "NOT A NUMBER" + C.n)
         return False
 
@@ -418,20 +428,12 @@ def match(keys, vals, value):
     for i in range(len(keys)):
         if value <= keys[i]:
             return vals[i]
-        else:
-            continue
     return False
 
 
 def recalculate_wellness():
-    if G.colony.morale > 2000:
-        G.colony.morale = 2000
-    if G.colony.morale < -2000:
-        G.colony.morale = -2000
-    if G.colony.health > 2000:
-        G.colony.health = 2000
-    if G.colony.health < -2000:
-        G.colony.health = -2000
+    G.colony.morale = max(min(G.colony.morale,2000),-2000)
+    G.colony.health = max(min(G.colony.health,2000),-2000)
     hapcalc = G.colony.morale / 1000
     heacalc = G.colony.morale / 1000
     G.colony.modifier_work = 2**hapcalc
@@ -526,7 +528,8 @@ def job_management():
 
 def rsm__tick():
     gatherer_update()
-    colony_consume()
+    liquid_consume()
+    food_consume()
     for category in G.inventory:
         for resource in G.inventory[category].items:
             resource.count = round(resource.count * G.storage_efficiency)
@@ -641,7 +644,7 @@ def rsm__res__cooking():
 
 
 def dev_change_health():
-    if G.enter_dev_pass():
+    if enter_dev_pass():
         pass
     else:
         return False
@@ -668,7 +671,7 @@ def change_colony_name():
 
 
 def dev_change_morale():
-    if G.enter_dev_pass():
+    if enter_dev_pass():
         pass
     else:
         return False
@@ -822,33 +825,33 @@ def rsm__init():
 
     #Define Food
     G.inventory["food"].items.append(
-        G.Food("Wild Vegetation", 0, "food", "wild-greens", 1, 0, 2))
+        G.Consumable("Wild Vegetation", 0, "food", "wild-greens", 1, 0, 2, "food"))
     G.inventory["food"].items.append(
-        G.Food("Grown Vegetation", 0, "food", "grown-greens", 2, 1, 3))
+        G.Consumable("Grown Vegetation", 0, "food", "grown-greens", 2, 1, 3, "food"))
     G.inventory["food"].items.append(
-        G.Food("Fruit", 0, "food", "fruit", 2, 1, 3))
+        G.Consumable("Fruit", 0, "food", "fruit", 2, 1, 3, "food"))
     G.inventory["food"].items.append(
-        G.Food("Raw Meat", 0, "food", "raw-meat", 2, -2, 1))
+        G.Consumable("Raw Meat", 0, "food", "raw-meat", 2, -2, 1, "food"))
     G.inventory["food"].items.append(
-        G.Food("Cooked Meat", 0, "food", "cooked-meat", 4, 3, 4))
+        G.Consumable("Cooked Meat", 0, "food", "cooked-meat", 4, 3, 4, "food"))
     G.inventory["food"].items.append(
-        G.Food("Raw Seafood", 0, "food", "raw-fish", 2, -2, 1))
+        G.Consumable("Raw Seafood", 0, "food", "raw-fish", 2, -2, 1, "food"))
     G.inventory["food"].items.append(
-        G.Food("Cooked Seafood", 0, "food", "cooked-fish", 3, 3, 4))
+        G.Consumable("Cooked Seafood", 0, "food", "cooked-fish", 3, 3, 4, "food"))
     G.inventory["food"].items.append(
-        G.Food("Sushi", 0, "food", "sushi", 3, 2, 4))
+        G.Consumable("Sushi", 0, "food", "sushi", 3, 2, 4, "food"))
 
     #Define Liquids
     G.inventory["liquid"].items.append(
-        G.Liquid("Fresh Water", 0, "liquid", "water", 2, 0, 3))
+        G.Consumable("Fresh Water", 0, "liquid", "water", 2, 0, 3, "liquid"))
     G.inventory["liquid"].items.append(
         G.Resource("Salt Water", 0, "liquid", "sea-water"))
     G.inventory["liquid"].items.append(
-        G.Liquid("Dirty Water", 0, "liquid", "mud-water", 1, -1, 2))
+        G.Consumable("Dirty Water", 0, "liquid", "mud-water", 1, -1, 2, "liquid"))
     G.inventory["liquid"].items.append(
-        G.Liquid("Poisonous Water", 0, "liquid", "bad-water", 1, -3, 1))
+        G.Consumable("Poisonous Water", 0, "liquid", "bad-water", 1, -3, 1, "liquid"))
     G.inventory["liquid"].items.append(
-        G.Liquid("Fruit Juice", 0, "liquid", "juice", 3, 2, 4))
+        G.Consumable("Fruit Juice", 0, "liquid", "juice", 3, 2, 4, "liquid"))
 
     #Define Primitive Resources
     G.inventory["primitive"].items.append(

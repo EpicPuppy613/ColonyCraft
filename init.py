@@ -1,37 +1,56 @@
 import sys, getpass
 from random import randint
 
-dev_file = open("devpasscode.pass", "r")
-dev_passcode = bytes.fromhex(dev_file.readline()).decode("utf-8")
+with open("devpasscode.pass", "r", encoding="utf-8") as dev_file:
+    dev_passcode = bytes.fromhex(dev_file.readline()).decode("utf-8")
 dev_file.close()
+
+
+def gen_bar(value,
+            maximum,
+            length=20,
+            left="",
+            segment="█",
+            empty="░",
+            right=""):
+    progress = value / maximum
+    amount = round(progress * length)
+    output = left
+    for _ in range(amount):
+        output += segment
+    for _ in range(length - amount):
+        output += empty
+    output += right
+    return output
 
 
 class Color:
     def __init__(self):
-        self.black = "\u001b[30m"
-        self.red = "\u001b[31m"
-        self.green = "\u001b[32m"
-        self.yellow = "\u001b[33m"
-        self.blue = "\u001b[34m"
-        self.magenta = "\u001b[35m"
-        self.cyan = "\u001b[36m"
-        self.white = "\u001b[37m"
-        self.reset = "\u001b[0m"
-        self.d = self.black
-        self.r = self.red
-        self.g = self.green
-        self.y = self.yellow
-        self.b = self.blue
-        self.m = self.magenta
-        self.c = self.cyan
-        self.w = self.white
-        self.n = self.reset
+        self.d = "\u001b[30m"
+        self.r = "\u001b[31m"
+        self.g = "\u001b[32m"
+        self.y = "\u001b[33m"
+        self.b = "\u001b[34m"
+        self.m = "\u001b[35m"
+        self.c = "\u001b[36m"
+        self.w = "\u001b[37m"
+        self.n = "\u001b[0m"
         self.custom = []
         for i in range(0, 256):
             self.custom.append("\u001b[38;5;{ID}m".format(ID=i))
 
 
 C = Color()
+
+
+def enter_dev_pass():
+    print("DEV PASSCODE REQUIRED\n>", end="")
+    passcode_entry = getpass.getpass("")
+    if passcode_entry == dev_passcode:
+        print("{C.g}ACCESS GRANTED{C.n}".format(C=C))
+        return True
+    print("{C.r}INCORRECT PASSCODE{C.n}".format(C=C))
+    return False
 
 
 class Command:
@@ -65,6 +84,7 @@ class Game:
         self.gamestate = 0
 
     event_blacklist = []
+    consumable_types = ["food", "liquid"]
     mods = []
     definitions = {}
     version = "1.2.0"
@@ -92,26 +112,16 @@ class Game:
 
     class Consumable(Resource):
         def __init__(self, name, count, catid, resid, saturation, enjoyment,
-                     priority):
+                     priority, itemtype):
             super().__init__(name, count, catid, resid)
             self.saturation = saturation
             self.enjoyment = enjoyment
             self.priority = priority
-
-    class Food(Consumable):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment,
-                     priority):
-            super().__init__(name, count, catid, resid, saturation, enjoyment,
-                             priority)
-
-    class Liquid(Consumable):
-        def __init__(self, name, count, catid, resid, saturation, enjoyment,
-                     priority):
-            super().__init__(name, count, catid, resid, saturation, enjoyment,
-                             priority)
+            if not itemtype in G.consumable_types:
+                raise Exception("Consumable type does not exist")
 
     class Unlockable:
-        def __init__(self, name, desc, techid, cost, utype, reqids=[]):
+        def __init__(self, name, desc, techid, cost, utype, reqids=None):
             self.name = name
             self.desc = desc
             self.techid = techid
@@ -131,7 +141,8 @@ class Game:
                      science,
                      aerospace,
                      eventname,
-                     reqids=[]):
+                     reqids=None):
+            super().__init__(name, desc, techid, None, "r", reqids)
             self.name = name
             self.desc = desc
             self.techid = techid
@@ -146,10 +157,10 @@ class Game:
             self.reqids = reqids
 
         def researchable(self):
-            if G.ADV_DEBUG:
+            if G.DEBUG:
                 print("Checking technology " + self.techid)
-            if len(self.reqids) == 0:
-                if G.ADV_DEBUG:
+            if self.reqids == None:
+                if G.DEBUG:
                     print(C.g + "Technology " + self.techid +
                           " VALID (requirements = 0)" + C.n)
                 return True
@@ -160,17 +171,17 @@ class Game:
                     if tech.techid == req:
                         obtained = True
                 if obtained == False:
-                    if G.ADV_DEBUG:
+                    if G.DEBUG:
                         print(C.r + "Technology " + self.techid +
                               " INVALID (missing requirement)" + C.n)
                     return False
                 status = True
             if status:
-                if G.ADV_DEBUG:
+                if G.DEBUG:
                     print(C.g + "Technology " + self.techid +
                           " VALID (requirements met)" + C.n)
                 return True
-            if G.ADV_DEBUG:
+            if G.DEBUG:
                 print(C.r + "Technology " + self.techid +
                       " INVALID (unknown reason)" + C.n)
             return False
@@ -196,7 +207,7 @@ class Game:
                 total_weight += thing.weight
                 table.append(total_weight)
                 things.append(thing)
-            for rolls in range(count):
+            for _ in range(count):
                 roll = randint(1, total_weight)
                 for weight in range(len(table)):
                     if roll <= table[weight]:
@@ -238,26 +249,8 @@ class Game:
             self.hidden.append(command)
         self.definitions[command] = Command(function, mod)
 
-    def gen_bar(self,
-                value,
-                maximum,
-                length,
-                left="",
-                segment="█",
-                empty="░",
-                right=""):
-        progress = value / maximum
-        amount = round(progress * length)
-        output = left
-        for i in range(amount):
-            output += segment
-        for i in range(length - amount):
-            output += empty
-        output += right
-        return output
-
     def get_gamestate(self):
-        return "[gamestate]"
+        return self.gamestate
 
     def get_command(self):
         command = input(">")
@@ -271,46 +264,27 @@ class Game:
         runcommand = self.definitions[command]
         runcommand.run()
 
-    def printr(self, stuff):
-        print(stuff, end="\r")
-
     def initialize_mod(self, mod):
         self.mods.append(mod)
 
-    def enter_dev_pass(self):
-        print("DEV PASSCODE REQUIRED\n>", end="")
-        passcode_entry = getpass.getpass("")
-        if passcode_entry == dev_passcode:
-            print("{C.g}ACCESS GRANTED{C.n}".format(C=C))
-            return True
-        else:
-            print("{C.r}INCORRECT PASSCODE{C.n}".format(C=C))
-            return False
-
     #Events
-    DEBUG = True
-    ADV_DEBUG = False
+    DEBUG = False
 
     def rsm__(self, event):
         for mod in self.mods:
             try:
-                if self.ADV_DEBUG:
-                    print("DEBUG: Calling event 'rsm__" + event +
-                          "' in module '" + mod + "'")
                 getattr(sys.modules[mod], "rsm__" + event)()
             except AttributeError:
-                if self.ADV_DEBUG:
-                    print(C.r + "DEBUG: Event 'rsm__" + event +
-                          "' doesn't exist in module '" + mod + "'" + C.n)
                 pass
             except BaseException as err:
                 if self.DEBUG:
                     raise Exception() from err
-        if event != "init" and event != "version":
+        if not event in ["version","init"]:
             for entry in self.event_blacklist:
                 if entry in event:
                     return False
             sys.modules["saving"].rsm__autosave()
+        return True
 
 
 G = Game()
