@@ -145,6 +145,11 @@ def population_update():
     G.colony.young += round(G.colony.adult * randborn *
                             G.colony.modifier_health)
     G.colony.workers[1] = G.colony.adult
+    if G.colony.workers[0] > G.colony.workers[1]:
+        print(C.r+"Previously employed workers are dead. The colony scrambles to fill the spot, all of your workers are now unassigned"+C.n)
+        for job in G.jobs.all:
+            G.jobs.all[job].count = 0
+        G.colony.workers[0] = 0
 
 
 def research_choice():

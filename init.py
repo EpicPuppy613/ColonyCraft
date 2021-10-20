@@ -268,7 +268,7 @@ class Game:
         self.mods.append(mod)
 
     #Events
-    DEBUG = False
+    DEBUG = True
 
     def rsm__(self, event):
         for mod in self.mods:
