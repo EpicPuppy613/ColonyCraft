@@ -7,7 +7,7 @@ G.initialize_mod(__name__)
 
 def autosave():
     save_file = open("saves/autosave.ccsave", "wb")
-    name_file = open("saves/autoname.name", "w")
+    name_file = open("saves/autoname.name", "w", encoding="utf-8")
     pickle.dump(G, save_file)
     name_file.write(G.colony_name)
     save_file.close
@@ -15,9 +15,9 @@ def autosave():
 
 
 def save_game():
-    slot_a = open("saves/savea.name", "r")
-    slot_b = open("saves/saveb.name", "r")
-    slot_c = open("saves/savec.name", "r")
+    slot_a = open("saves/savea.name", "r", encoding="utf-8")
+    slot_b = open("saves/saveb.name", "r", encoding="utf-8")
+    slot_c = open("saves/savec.name", "r", encoding="utf-8")
     name_a = slot_a.readline()
     name_b = slot_b.readline()
     name_c = slot_c.readline()
@@ -43,13 +43,13 @@ def save_game():
         return False
     if save_slot == 1:
         save_file = open("saves/save-a.ccsave", "wb")
-        name_file = open("saves/savea.name", "w")
+        name_file = open("saves/savea.name", "w", encoding="utf-8")
     elif save_slot == 2:
         save_file = open("saves/save-b.ccsave", "wb")
-        name_file = open("saves/saveb.name", "w")
+        name_file = open("saves/saveb.name", "w", encoding="utf-8")
     elif save_slot == 3:
         save_file = open("saves/save-c.ccsave", "wb")
-        name_file = open("saves/savec.name", "w")
+        name_file = open("saves/savec.name", "w", encoding="utf-8")
     pickle.dump(G, save_file)
     name_file.write(G.colony_name)
     name_file.close()
@@ -58,10 +58,10 @@ def save_game():
 
 
 def load_game():
-    autoslot = open("saves/autoname.name", "r")
-    slot_a = open("saves/savea.name", "r")
-    slot_b = open("saves/saveb.name", "r")
-    slot_c = open("saves/savec.name", "r")
+    autoslot = open("saves/autoname.name", "r", encoding="utf-8")
+    slot_a = open("saves/savea.name", "r", encoding="utf-8")
+    slot_b = open("saves/saveb.name", "r", encoding="utf-8")
+    slot_c = open("saves/savec.name", "r", encoding="utf-8")
     autoname = autoslot.readline()
     name_a = slot_a.readline()
     name_b = slot_b.readline()
@@ -126,7 +126,7 @@ def rsm__version():
 
 
 def rsm__init():
-    autoslot = open("saves/autoname.name", "r")
+    autoslot = open("saves/autoname.name", "r", encoding="utf-8")
     autoname = autoslot.readline()
     autoslot.close()
     if autoname != "Empty":
