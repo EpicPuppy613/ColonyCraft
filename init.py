@@ -117,6 +117,7 @@ class Game:
             self.saturation = saturation
             self.enjoyment = enjoyment
             self.priority = priority
+            self.itemtype = itemtype
             if not itemtype in G.consumable_types:
                 raise Exception("Consumable type does not exist")
 
@@ -269,12 +270,17 @@ class Game:
 
     #Events
     DEBUG = True
+    ADV_DEBUG = False
 
     def rsm__(self, event):
         for mod in self.mods:
             try:
                 getattr(sys.modules[mod], "rsm__" + event)()
-            except AttributeError:
+            except AttributeError as err:
+                if G.ADV_DEBUG:
+                    print(C.r+"AttributeError '{}' at '{}'".format(event,mod) + C.n)
+                    if mod == "mods.basemod":
+                        raise Exception() from err
                 pass
             except BaseException as err:
                 if self.DEBUG:

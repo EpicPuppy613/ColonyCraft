@@ -489,6 +489,9 @@ def job_management():
         while True:
             try:
                 amount = int(input(">"))
+                if amount < 0:
+                    print(C.r + "Invalid number" + C.n)
+                    continue
             except:
                 print(C.r + "Invalid number" + C.n)
                 continue
@@ -512,6 +515,9 @@ def job_management():
         while True:
             try:
                 amount = int(input(">"))
+                if amount < 0:
+                    print(C.r + "Invalid number" + C.n)
+                    continue
             except:
                 print(C.r + "Invalid Number" + C.n)
                 continue
@@ -1022,7 +1028,7 @@ def rsm__end():
         for resource in G.inventory[category].items:
             resource.count = 0
     for job in G.jobs.all:
-        job.count = 0
+        G.jobs.all[job].count = 0
     G.colony.workers[0] = 0
 
 
