@@ -12,6 +12,7 @@ function Game() {
             return '<span style="color: #'+color+';">';
         };
     };
+
     this.c = new(this.color)
     this.UpdateConsole = function UpdateConsole() {
         var currentConsole = "";
@@ -26,12 +27,14 @@ function Game() {
         gameConsole.innerHTML = currentConsole;
         gameConsole.scrollTop = gameConsole.scrollHeight;
     };
+
     this.InitializePanel = function InitializePanel(panelName) {
         var newPanelContent = "";
         newPanelContent = gamePanels.innerHTML;
         newPanelContent = newPanelContent + '<panel class="panel" id="'+panelName+'"></panel>';
         gamePanels.innerHTML = newPanelContent;
     };
+    
     this.UpdateSettings = function UpdateSettings() {
         const panels = document.getElementsByClassName("panel");
         const newConsoleHeight = consoleHeight.value;

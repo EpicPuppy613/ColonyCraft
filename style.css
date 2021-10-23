@@ -3,10 +3,12 @@ html {
     color: white;
     font-family: monospace;
 }
+
 #consoleContainer {
     padding: 5px;
     background-color: black
 }
+
 #panels {
     min-height: 15rem;
     max-height: 15rem;
@@ -19,6 +21,7 @@ html {
     white-space: nowrap;
     overflow-x: scroll;
 }
+
 .panel {
     float: left;
     background-color: #050505;
@@ -30,16 +33,19 @@ html {
     width: 30%;
     overflow-y: auto;
 }
+
 #console {
     min-height: 30rem;
     max-height: 30rem;
     overflow-y: scroll;
 }
+
 #commandInput {
     background-color: black;
     color: white;
     border: gray solid 1px;
 }
+
 #settings {
     margin: 5px;
 }
