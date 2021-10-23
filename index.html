@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div id="panels">
+        <panel class="panel">
+            This is a panel.
+        </panel>
+    </div>  
+    <div id="consoleContainer">
+        <p id="console">
+        your colony is <span style="color: #550099;">de<span style="color: #995500;">ad</span> rip
+        </p>
+        > <input id="commandInput"/>
+    </div>
+    <div id="settings">
+        <strong>Settings</strong><br>
+        <label for="consoleHeight">Console Height:</label>
+        <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="30"/><br>
+        <label for="panelHeight">Panel Height:</label>
+        <input type="number" name="Panel Height" min="5" max="30" id="panelHeight" value="15"/><br>
+        <button type="button" onclick="G.UpdateSettings()">Update</button>
+    </div>
+    <script src="init.js"></script>
+  </body>
+</html>
