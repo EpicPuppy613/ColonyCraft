@@ -1,3 +1,5 @@
+//Debugging tool
+//try {
 //Initialize Game
 G = {}
 
@@ -8,7 +10,6 @@ G.inputBox = document.getElementById("commandInput");
 G.consoleHeight = document.getElementById("consoleHeight");
 G.panelHeight = document.getElementById("panelHeight");
 G.modLoader = document.getElementById("modLoading");
-G.modList = ["basemod.js"];
 G.listening = false;
 G.listeningTo = "";
 G.modFunctions = {};
@@ -24,7 +25,11 @@ G.initializedMods = [];
 G.modList = ["/basemod.js"];
 
 //Initialize Color Engine
-G.c = { "n": "</span>", "c": function (color) { return '<span style="color: #' + color + ';">'; } }
+G.c = { 
+    n: "</span>", 
+    c: function (color) { return '<span style="color: #' + color + ';">'; } ,
+    r: function (color) { return '</span><span style="color: #' + color + ';">'; }
+}
 
 //Initialize General Functions
 G.UpdateConsole = function () {
@@ -55,13 +60,20 @@ G.UpdateSettings = function () {
     G.gamePanels.style.minHeight = newPanelHeight + "rem";
     G.gamePanels.style.maxHeight = newPanelHeight + "rem";
     for (var i = 0; i < panels.length; i++) {
-        panels[i].style.maxHeight = (newPanelHeight - 1) + "rem";
+        panels[i].style.maxHeight = newPanelHeight + "rem";
     }
 };
 G.LoadMods = function () {
     for (mod of G.modList) {
-        import(mod)
-    }
+        try {
+            console.log("[INFO] LOADING MOD: " + mod)
+            import(mod);
+        } catch (err) {
+            console.log(err.stack);
+        };
+    };
+    G.consoleOutput.push("----------<br>" + G.c.c("0099bf") + "ColonyCraft Closed WEB TEST 1.1.0" + G.c.n)
+    G.UpdateConsole()
 };
 G.RegisterCommand = function (name, desc, id, ref, commandFunction, unlocked = false) {
     newCommand = {}
@@ -86,7 +98,7 @@ G.RunCommand = function (command) {
     for (i = 0; i < G.commands.unlocked.length; i++) {
         if (command == G.commands.unlocked[i].id) {
             success = true;
-            console.log("RUNCOMMAND: "+command)
+            console.log("[INFO] RUNCOMMAND: " + command)
             try {
                 G.commandDirectory[command]();
             } catch (err) {
@@ -95,34 +107,84 @@ G.RunCommand = function (command) {
         };
     };
     if (!success) {
-        G.consoleOutput.push(G.c.c("dddd00")+"Unreconized command. Use 'help' for help."+G.c.n)
+        G.consoleOutput.push(G.c.c("dddd00") + "Unreconized command. Use 'help' for help." + G.c.n)
     }
 };
 G.Broadcast = function (broadcast, args) {
     toBroadcast = G.broadcastDirectory[broadcast]; //Returns array of functions to run
     for (x = 0; x < toBroadcast.length; x++) {
-        console.log("BROADCAST: "+broadcast)
+        console.log("[INFO] BROADCAST: " + broadcast)
         toBroadcast[x](args);
     }
+};
+G.RegisterFunction = function (id, definition) {
+    if (id in G.modFunctions) {
+        console.log("[ERR] function " + id + " already exists");
+    } else {
+        G.modFunctions[id] = definition;
+    };
+};
+G.RegisterMod = function (modInfo) {
+    if (modInfo.modid == undefined) {
+        throw "ERR: modid is undefined";
+    };
+    if (modInfo.parents == undefined) {
+        throw "ERR: parents of mod " + modInfo.modid + " is undefined";
+    };
+    if (modInfo.modid in G.initializedMods) {
+        throw "ERR: duplicate mod id " + modid;
+    };
+    for (modRequirement of modInfo.parents) {
+        if (!modRequirement in G.initializedMods) {
+            G.consoleOutput.push(C.c.c("ff1111") + "ERROR LOADING MOD: " + modInfo.modid + " requres mod " + modRequirement + " to function properly." + G.c.n);
+            throw "ERR: parent does not exist";
+        };
+    };
+    G.initializedMods.push(modInfo.modid)
+};
+G.GenBar = function (value, max, length, left = "", segment = "█", empty = "░", right = "") {
+    var progress = value / max
+    var barAmount = Math.round(progress * length)
+    var output = left
+    for (f = 0; f < barAmount; f++) {
+        output = output + segment;
+    };
+    for (e = 0; e < length - barAmount; e++) {
+        output = output + empty;
+    };
+    output = output + right;
+    return output;
 };
 
 document.addEventListener('keydown', function (event) {
     if (event.keyCode == 13) {
+        if (G.listening) {
+            console.log("[INFO] ACTIVE INPUT")
+            prevListening = true
+        } else {
+            prevListening = false
+        };
+        G.listening = false;
         var commandRun = G.inputBox.value;
         G.consoleOutput.push("> " + commandRun);
         G.inputBox.value = "";
-        if (!G.listening) {
+        if (!prevListening) {
             G.RunCommand(commandRun);
         } else {
-            G.Broadcast(listeningTo, commandRun);
+            console.log("[INFO] INPUT RECIEVED: " + commandRun + " broadcasting: " + G.listeningTo);
+            G.Broadcast(G.listeningTo, commandRun);
         };
         G.UpdateConsole();
     };
 });
 
-G.consoleOutput.push("LOADING MODS...")
-G.UpdateConsole()
-console.log("--LOADING MODS--")
+G.consoleOutput.push("LOADING MODS...");
+G.UpdateConsole();
+console.log("[INFO] --LOADING MODS--");
 G.LoadMods();
-G.consoleOutput.push(G.c.c("00dd00") + "INITIALIZED<br>" + G.c.n + "----------<br>" + G.c.c("0099bf") + "ColonyCraft Closed WEB TEST 1.1.0" + G.c.n)
-G.UpdateConsole()
+//Debugging tool
+/*
+} catch (err) {
+    console.log(err.stack);
+};
+*/

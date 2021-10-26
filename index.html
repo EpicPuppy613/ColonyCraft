@@ -13,18 +13,15 @@
         <p id="console">
             
         </p>
-        > <input id="commandInput"/>
+        > <input maxlength="75" id="commandInput"/>
     </div>
     <div id="settings">
         <strong>Settings</strong><br>
         <label for="consoleHeight">Console Height:</label>
-        <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="35"/><br>
+        <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="40"/><br>
         <label for="panelHeight">Panel Height:</label>
-        <input type="number" name="Panel Height" min="5" max="50" id="panelHeight" value="20"/><br>
+        <input type="number" name="Panel Height" min="5" max="40" id="panelHeight" value="15"/><br>
         <button type="button" onclick="G.UpdateSettings()">Update</button>
-    </div>
-    <div id="modLoading">
-        
     </div>
     <script src="init.js"></script>
   </body>
