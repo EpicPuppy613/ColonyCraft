@@ -2,6 +2,7 @@ html {
     background-color: #111111;
     color: white;
     font-family: monospace;
+    font-size: 14px;
 }
 
 #commandInput {
@@ -20,7 +21,7 @@ html {
     margin-bottom: 5px;
     columns: auto;
     white-space: nowrap;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .panel {
@@ -31,13 +32,13 @@ html {
     margin-right: 4px;
     max-height: 15rem;
     max-width: 35%;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 #console {
     min-height: 40rem;
     max-height: 40rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #commandInput {
