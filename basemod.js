@@ -81,9 +81,7 @@ document.getElementById("colony").style.textAlign = "center";
 
 //Initialize Functions
 console.log("[INFO][bm] Initializing functions")
-G.RegisterFunction("bmColonyUpdate", function () {
-    
-});
+
 G.RegisterFunction("bmColonyPanelUpdate", function () {
     const colonyPanel = document.getElementById("colony");
     const colonyPopulation = G.colony.young + G.colony.adult + G.colony.elder;
@@ -93,8 +91,16 @@ G.RegisterFunction("bmColonyPanelUpdate", function () {
     G.c.c("00afaf") + "POPULATION: " + colonyPopulation + "<br>" + G.c.n + 
     G.c.c("00dd77") + "Children: " + G.colony.young + "<br>" + G.c.n +
     G.c.c("77ee00") + "Adults: " + G.colony.adult + "<br>" + G.c.n +
-    G.c.c("aabb00") + "Elderly: " + G.colony.elder + G.c.n;
+    G.c.c("aabb00") + "Elderly: " + G.colony.elder + G.c.n +
+    G.c.c("00");
     colonyPanel.innerHTML = writePanel;
+});
+
+G.RegisterFunction("bmPopulationUpdate", function () {
+
+});
+G.RegisterFunction("bmRecalculateCondition", function () {
+
 });
 
 console.log("[INFO][bm] LOAD: BASEMOD ALPHA v1.1.0");
