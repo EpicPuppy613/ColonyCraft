@@ -5,11 +5,14 @@ G.RegisterMod({
     api: 1.0,
     release: "alpha",
     modid: "bm",
-    parents: []
+    parents: ["saving"]
 });
 
+console.log("[INFO][bm] Initializing Objects")
+
 //Initialize Storage Objects
-console.log("[INFO][bm] Loading colony object")
+G.eotw = 0;
+
 G.colony = {};
 G.colony.adult = 0;
 G.colony.elder = 0;
@@ -17,14 +20,13 @@ G.colony.young = 0;
 G.colony.morale = 0;
 G.colony.health = 0;
 G.colony.overall = 0;
-G.colony.name = "";
+G.colony.name = "NO COLONY";
 G.colony.modifierWork = 1;
 G.colony.modifierHealth = 1;
 G.colony.colorMorale = "rgb(255,255,0)";
 G.colony.colorHealth = "rgb(255,255,0)";
 G.colony.colorOverall = "rgb(255,255,0)";
 
-console.log("[INFO][bm] Loading jobs object")
 G.jobs = {};
 G.jobs.all = {};
 G.jobs.unlocked = [];
@@ -34,7 +36,6 @@ G.jobs.template = function (name, id, count) {
     this.count = count
 };
 
-console.log("[INFO][bm] Loading stats object")
 G.stats = {};
 G.stats.xp = 0;
 G.stats.level = 0;
@@ -64,7 +65,7 @@ G.stats.LevelUp = function () {
     };
     G.modFunctions["bmStatsPanelUpdate"]();
 };
-console.log("[INFO][bm] Loading evolution object");
+
 G.evolution = {};
 G.evolution.researches = [];
 G.evolution.researchesResearched = [];
@@ -79,8 +80,9 @@ G.evolution.current = null;
 G.evolution.research.progress = [0,0,0,0];
 G.evolution.research.needed = [0,0,0,0];
 
+console.log("[INFO][bm] Initializing Functions")
+
 //Initialize Commands
-console.log("[INFO][bm] Initializing commands")
 G.RegisterCommand("Help", "shows information about different commands", "help", "help", function () {
     G.consoleOutput.push(G.c.c("#1155dd") + "Available Commands:" + G.c.n);
     for (const getCommandHelp of G.commands.unlocked) {
@@ -124,31 +126,40 @@ G.RegisterCommand("Dev Set Health", "chest by settings the health value", "dev_s
     G.listening = true;
     G.listeningTo = "bmCheatHealth";
 });
+G.RegisterCommand("Tick Game", "progress the game time by 1 year", "tick", "tick", function () {
+    G.consoleOutput.push("1 Year has gone by...");
+    G.eotw--;
+    G.Broadcast("ccTick");
+});
 
 //Initialize Events
-console.log("[INFO][bm] Initializing events")
 G.RegisterBroadcast("ccBegin", function () {
     G.colony.elder = 2;
     G.colony.adult = 10;
     G.colony.young = 4;
+    G.eotw = 200;
     G.RemoveEntry(G.commands.unlocked, "settle");
     G.commands.hidden.push("force-end");
     G.commands.hidden.push("dev-add-colony");
     G.commands.hidden.push("dev-set-morale");
     G.commands.hidden.push("dev-set-health");
     G.commands.unlocked.push("ascend");
+    G.commands.unlocked.push("tick");
     G.modFunctions["bmColonyPanelUpdate"]();
 });
 G.RegisterBroadcast("ccEnd", function () {
     G.colony.elder = 0;
     G.colony.adult = 0;
     G.colony.young = 0;
+    G.eotw = 0;
+    G.colony.name = "NO COLONY";
     G.commands.unlocked.push("settle");
     G.RemoveEntry(G.commands.hidden, "force-end");
     G.RemoveEntry(G.commands.hidden, "dev-add-colony");
     G.RemoveEntry(G.commands.hidden, "dev-set-morale");
     G.RemoveEntry(G.commands.hidden, "dev-set-health");
     G.RemoveEntry(G.commands.unlocked, "ascend");
+    G.RemoveEntry(G.commands.unlocked, "tick");
     document.getElementById("colony").innerHTML = "-[COLONY INFO]-<br>NO ACTIVE COLONY";
 });
 
@@ -219,8 +230,6 @@ G.RegisterBroadcast("bmCheatHealth", function (args) {
 });
 
 //Initialize Functions
-console.log("[INFO][bm] Initializing functions")
-
 G.RegisterFunction("bmColonyPanelUpdate", function () {
     const colonyPanel = document.getElementById("colony");
     const colonyPopulation = G.colony.young + G.colony.adult + G.colony.elder;
@@ -282,8 +291,6 @@ G.RegisterFunction("bmConditionUpdate", function () {
 });
 
 //Initialize Panels
-console.log("[INFO][bm] Initializing panels")
-
 G.InitializePanel("colony");
 document.getElementById("colony").innerHTML = "-[COLONY INFO]-<br>NO ACTIVE COLONY";
 document.getElementById("colony").style.textAlign = "center";
@@ -293,3 +300,4 @@ document.getElementById("stats").style.textAlign = "center";
 G.modFunctions["bmStatsPanelUpdate"]();
 
 console.log("[INFO][bm] LOAD: BASEMOD ALPHA v1.1.0");
+G.LoadMods();

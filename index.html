@@ -5,24 +5,32 @@
     <meta name="viewport" content="width=device-width">
     <title>ColonyCraft</title>
     <link href="style.css" rel="stylesheet" type="text/css"/>
+    <link rel="icon" type="image/icon" href="https://img.icons8.com/external-kiranshastry-gradient-kiranshastry/64/000000/external-flag-outdoor-kiranshastry-gradient-kiranshastry-1.png"/>
   </head>
   <body>
-    <div id="panels">
-    </div>  
-    <div id="consoleContainer">
-        <p id="console">
-            
-        </p>
-        > <input maxlength="75" id="commandInput"/>
+    <div id="game">
+        <div id="panels">
+        </div>  
+        <div id="consoleContainer">
+            <p id="console">
+                
+            </p>
+            > <input maxlength="75" id="commandInput"/>
+        </div>
+        <div id="settings">
+            <strong>Settings</strong><br>
+            <label for="consoleHeight">Console Height:</label>
+            <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="35"/><br>
+            <label for="panelHeight">Panel Height:</label>
+            <input type="number" name="Panel Height" min="5" max="40" id="panelHeight" value="15"/><br>
+            <button type="button" onclick="G.UpdateSettings()">Update</button>
+        </div>
     </div>
-    <div id="settings">
-        <strong>Settings</strong><br>
-        <label for="consoleHeight">Console Height:</label>
-        <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="40"/><br>
-        <label for="panelHeight">Panel Height:</label>
-        <input type="number" name="Panel Height" min="5" max="40" id="panelHeight" value="15"/><br>
-        <button type="button" onclick="G.UpdateSettings()">Update</button>
-    </div>
+    <div id="loading">
+        <h2>Game loading, please wait...</h2>    
+        <progress style="width: 50%">
+        <h3 style="color: #dd0000" id="loadErrors"></h3>
+    </div> 
     <script src="init.js"></script>
   </body>
 </html>

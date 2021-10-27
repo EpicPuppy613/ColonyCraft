@@ -10,6 +10,7 @@ G.inputBox = document.getElementById("commandInput");
 G.consoleHeight = document.getElementById("consoleHeight");
 G.panelHeight = document.getElementById("panelHeight");
 G.modLoader = document.getElementById("modLoading");
+document.getElementById("game").style.display = "none";
 G.listening = false;
 G.listeningTo = "";
 G.modFunctions = {};
@@ -20,10 +21,12 @@ G.commands.all = {};
 G.commands.hidden = [];
 G.broadcastDirectory = {};
 G.consoleOutput = [];
+G.savePackage = ["commands","stats"];
 
 //Initialize Modlists
 G.initializedMods = [];
 G.modList = ["basemod.js"];
+G.modList.unshift("saving.js");
 
 //Initialize Color Engine
 G.c = { 
@@ -34,12 +37,11 @@ G.c = {
 
 //Initialize General Functions
 G.MatchArray = function (array, match) {
-    for (f = 0; f < array.length; f++) {
-        if (array[f] == match) {
-            return true
-        };
+    if (array.indexOf(match) == -1) {
+        return false
+    } else {
+        return true
     };
-    return false
 };
 G.UpdateConsole = function () {
     var currentConsole = "";
@@ -72,18 +74,19 @@ G.UpdateSettings = function () {
         panels[i].style.maxHeight = newPanelHeight + "rem";
     }
 };
+G.currentModIndex = 0;
 G.LoadMods = function () {
-    for (mod of G.modList) {
-        try {
-            var script = document.createElement('script');
-			script.setAttribute('src',mod+'?r='+Math.random());//we add a random bit to the URL to prevent caching
-			document.head.appendChild(script);
-        } catch (err) {
-            console.log(err.stack);
-        };
+    if (G.currentModIndex < G.modList.length) {
+        var script = document.createElement('script');
+        script.setAttribute('src',G.modList[G.currentModIndex]+'?r='+Math.random());//we add a random bit to the URL to prevent caching
+        document.head.appendChild(script);
+    } else {
+        document.getElementById("game").style.display = "block";
+        document.getElementById("loading").style.display = "none";
+        G.consoleOutput.push("----------<br>" + G.c.c("#00bfbf") + "ColonyCraft WEB ALPHA v1.1.0" + G.c.n);
+        G.UpdateConsole();
     };
-    G.consoleOutput.push("----------<br>" + G.c.c("#0099bf") + "ColonyCraft Closed WEB TEST 1.1.0" + G.c.n)
-    G.UpdateConsole()
+    G.currentModIndex++
 };
 G.RegisterCommand = function (name, desc, id, ref, commandFunction, unlocked = false, hidden = false) {
     newCommand = {}
@@ -119,7 +122,8 @@ G.RunCommand = function (command) {
     };
     if (!success) {
         G.consoleOutput.push(G.c.c("#dddd00") + "Unreconized command. Use 'help' for help." + G.c.n)
-    }
+    };
+    G.UpdateConsole();
 };
 G.Broadcast = function (broadcast, args) {
     toBroadcast = G.broadcastDirectory[broadcast]; //Returns array of functions to run
@@ -143,28 +147,27 @@ G.RegisterFunction = function (id, definition) {
     };
 };
 G.RegisterMod = function (modInfo) {
-    try {
+    const loadError = document.getElementById("loadErrors");
     if (modInfo.modid == undefined) {
-        throw "ERR: modid is undefined";
+        loadError.innerHTML = "ERROR: a modid is undefined";
+        throw "LoadError: modid is undefined";
     };
-    console.log("[INFO] REGISTERING MOD: " + modInfo.modid)
     if (modInfo.parents == undefined) {
-        throw "ERR: parents of mod " + modInfo.modid + " is undefined";
+        loadError.innerHTML = "ERROR: the parents of mod " + modInfo.modid + " is undefined";
+        throw "LoadError: parents of mod " + modInfo.modid + " is undefined";
     };
     if (G.MatchArray(G.initializedMods,modInfo.modid)) {
-        throw "ERR: duplicate mod id " + modid;
+        loadError.innerHTML = "ERROR: there is a duplicate mod id of " + modid;
+        throw "LoadError: duplicate mod id " + modid;
     };
     for (modRequirement of modInfo.parents) {
-        if (!G.MatchArray(G.InitializedMods,modRequirement)) {
-            G.consoleOutput.push(C.c.c("ff1111") + "ERROR LOADING MOD: " + modInfo.modid + " requres mod " + modRequirement + " to function properly." + G.c.n);
-            throw "ERR: parent does not exist";
+        if (!G.MatchArray(G.initializedMods,modRequirement)) {
+            loadError.innerHTML = "ERROR LOADING MOD: " + modInfo.modid + " requres mod " + modRequirement + " to function properly.";
+            throw "LoadError: parent '" + modRequirement + "' does not exist for mod '" + modInfo.modid + "'";
         };
     };
     console.log("[INFO] REGISTERED MOD: " + modInfo.modid);
     G.initializedMods.push(modInfo.modid);
-    } catch (err) {
-        console.log(err.stack);
-    };
 };
 G.GenBar = function (value, max, length, left = "", segment = "█", empty = "░", right = "") {
     var progress = value / max
@@ -197,7 +200,6 @@ document.addEventListener('keydown', function (event) {
             console.log("[INFO] INPUT RECIEVED, Broadcasting: " + G.listeningTo);
             G.Broadcast(G.listeningTo, commandRun);
         };
-        G.UpdateConsole();
     };
 });
 

@@ -5,6 +5,10 @@ html {
     font-size: 14px;
 }
 
+#loading {
+    text-align: center;
+}
+
 #commandInput {
     width: 95%;
 }
@@ -36,8 +40,8 @@ html {
 }
 
 #console {
-    min-height: 40rem;
-    max-height: 40rem;
+    min-height: 35rem;
+    max-height: 35rem;
     overflow-y: auto;
 }
 
