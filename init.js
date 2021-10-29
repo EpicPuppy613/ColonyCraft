@@ -13,8 +13,8 @@ G.modLoader = document.getElementById("modLoading");
 document.getElementById("game").style.display = "none";
 G.listening = false;
 G.listeningTo = "";
-G.modFunctions = {};
 G.commandDirectory = {};
+G.inventory = {};
 G.commands = {};
 G.commands.unlocked = [];
 G.commands.all = {};
@@ -34,6 +34,89 @@ G.c = {
     c: function (color) { return '<span style="color: ' + color + ';">'; } ,
     r: function (color) { return '</span><span style="color: ' + color + ';">'; }
 }
+
+//Initialize Constructors
+G.InventoryCategory = function (name, catid) {
+    this.name = name;
+    this.catid = catid;
+    this.items = [];
+};
+G.InventoryItem = function (name, catid, itemid) {
+    this.name = name;
+    this.catid = catid;
+    this.itemid = itemid;
+    this.count = 0;
+};
+G.FoodItem = function (name, catid, itemid, saturation, enjoyment, health, priority, type) {
+    this.name = name;
+    this.catid = catid;
+    this.itemid = itemid;
+    this.saturation = parseInt(saturation);
+    if (isNaN(this.saturation)) {
+        throw "LoadError: Invalid saturation value for " + itemid;
+    }
+    this.enjoyment = parseInt(enjoyment);
+    if (isNaN(this.enjoyment)) {
+        throw "LoadError: Invalid enjoyment value for " + itemid;
+    }
+    this.health = parseInt(health);
+    if (isNaN(this.enjoyment)) {
+        throw "LoadError: Invalid enjoyment value for " + itemid;
+    }
+    this.priority = parseInt(priority)
+    if (this.priority < 0 || this.priority > 5 || isNaN(this.priority)) {
+        throw "LoadError: Invalid priority value for " + itemid;
+    }
+    this.count = 0;
+    this.type = type;
+};
+
+//Initialize Inventory Functions
+G.GetItemById = function (itemid) {
+    for (category of Object.keys(G.inventory)) {
+        for (item of G.inventory[category].items) {
+            if (item.itemid == itemid) {
+                return item;
+            }
+        }
+    }
+    return false;
+};
+G.ChangeItemById = function (itemid, count) {
+    if (isNaN(parseInt(count))) {
+        return false;
+    }
+    for (category of Object.keys(G.inventory)) {
+        for (item of G.inventory[category].items) {
+            if (item.itemid == itemid) {
+                item.count = item.count + count
+                return item;
+            }
+        }
+    }
+    return false;
+};
+G.CategoryIsEmpty = function (category) {
+    if (category === undefined) {
+        return false;
+    }
+    for (item of category.items) {
+        if (item.count > 0) {
+            return false;
+        }
+    }
+    return true;
+};
+G.GiveAllItems = function (amount) {
+    if (isNaN(parseInt(amount))) {
+        return false;
+    }
+    for (category of Object.keys(G.inventory)) {
+        for (item of G.inventory[category].items) {
+            item.count = item.count + amount;
+        }
+    }
+};
 
 //Initialize General Functions
 G.MatchArray = function (array, match) {
@@ -68,8 +151,8 @@ G.UpdateSettings = function () {
     const newPanelHeight = panelHeight.value;
     G.gameConsole.style.minHeight = newConsoleHeight + "rem";
     G.gameConsole.style.maxHeight = newConsoleHeight + "rem";
-    G.gamePanels.style.minHeight = newPanelHeight + "rem";
-    G.gamePanels.style.maxHeight = newPanelHeight + "rem";
+    G.gamePanels.style.minHeight = (newPanelHeight - 0.8) + "rem";
+    G.gamePanels.style.maxHeight = (newPanelHeight - 0.8) + "rem";
     for (var i = 0; i < panels.length; i++) {
         panels[i].style.maxHeight = newPanelHeight + "rem";
     }
@@ -139,13 +222,6 @@ G.RemoveEntry = function (arrayRemove, value) {
     };
     return arrayRemove
 };
-G.RegisterFunction = function (id, definition) {
-    if (id in G.modFunctions) {
-        console.log("[WARN] function " + id + " already exists");
-    } else {
-        G.modFunctions[id] = definition;
-    };
-};
 G.RegisterMod = function (modInfo) {
     const loadError = document.getElementById("loadErrors");
     if (modInfo.modid == undefined) {
@@ -199,7 +275,8 @@ document.addEventListener('keydown', function (event) {
         } else {
             console.log("[INFO] INPUT RECIEVED, Broadcasting: " + G.listeningTo);
             G.Broadcast(G.listeningTo, commandRun);
-        };
+        }
+        G.UpdateConsole();
     };
 });
 

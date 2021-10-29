@@ -25,6 +25,7 @@ html {
     margin-bottom: 5px;
     columns: auto;
     white-space: nowrap;
+    overflow-y: hidden;
     overflow-x: auto;
 }
 
@@ -34,7 +35,7 @@ html {
     padding: 6px;
     margin: 0px;
     margin-right: 4px;
-    max-height: 15rem;
+    max-height: 14.2rem;
     max-width: 35%;
     overflow-x: auto;
 }

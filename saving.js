@@ -31,13 +31,12 @@ if (loadedSaveData == undefined) {
 } else {
     console.log("[INFO][saving] LOADING SAVE DATA")
     G.loadedSaveData = JSON.parse(loadedSaveData);
-    console.log(newSaveData);
     if (G.loadedSaveData.slotAuto != "EMPTY") {
         G.consoleOutput.push(G.c.c("#dd00dd") + "You have a save loaded in autosave, use 'load' to load it" + G.c.n)
     };
 };
 
-G.RegisterFunction("saveAuto",function (){
+G.SAVEAuto = function (){
     console.log("[INFO][saving] Autosaving game...");
     var toSave = JSON.stringify(G, G.ReplaceNull);
     //var toSave = JSON.stringify(G);
@@ -46,7 +45,7 @@ G.RegisterFunction("saveAuto",function (){
     G.loadedSaveData.slotAuto = G.colony.name;
     window.localStorage.setItem("saveData", JSON.stringify(G.loadedSaveData));
     G.consoleOutput.push(G.c.c("#00dd00") + "The game has been saved." + G.c.n);
-});
+};
 
 /*G.RegisterCommand("Load","load a saved game from a save slot","load","load",function () {
     if (G.loadedSaveData.slotA == "EMPTY" && G.loadedSaveData.slotB == "EMPTY" && G.loadedSaveData.slotC == "EMPTY" && G.loadedSaveData.slotAuto == "EMPTY") {
