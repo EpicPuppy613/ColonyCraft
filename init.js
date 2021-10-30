@@ -210,8 +210,8 @@ G.RunCommand = function (command) {
 };
 G.Broadcast = function (broadcast, args) {
     toBroadcast = G.broadcastDirectory[broadcast]; //Returns array of functions to run
+    console.log("[INFO] BROADCAST: " + broadcast)
     for (x = 0; x < toBroadcast.length; x++) {
-        console.log("[INFO] BROADCAST: " + broadcast)
         toBroadcast[x](args);
     }
 };
@@ -245,7 +245,7 @@ G.RegisterMod = function (modInfo) {
     console.log("[INFO] REGISTERED MOD: " + modInfo.modid);
     G.initializedMods.push(modInfo.modid);
 };
-G.GenBar = function (value, max, length, left = "", segment = "█", empty = "░", right = "") {
+G.GenBar = function (value, max, length, left = "", segment = "▮", empty = "▯", right = "") {
     var progress = value / max
     var barAmount = Math.round(progress * length)
     var output = left

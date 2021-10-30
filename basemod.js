@@ -10,6 +10,12 @@ G.RegisterMod({
 
 console.log("[INFO][bm] Initializing Objects")
 
+const firstTime = window.localStorage.getItem("firstTime");
+if (firstTime === null) {
+    G.consoleOutput.push(G.c.c("#00ff00") + "Welcome to ColonyCraft! As this is your first time playing, you can run the command 'tutorial' for a basic tutorial (WIP) or use the command 'help' to list all available commands. The Github wiki page also has some useful information. Good Luck!" + G.c.n);
+};
+//window.localStorage.setItem("firstTime",false);
+
 //Initialize Storage Objects
 G.eotw = 0;
 
@@ -63,7 +69,7 @@ G.stats.LevelUp = function () {
     if (levels > 0) {
         G.consoleOutput.push(G.c.c("#00dddd") + "You leveled up " + levels + " times! You gain " + skillgain + " skill points and " + talentgain + " talent points" + G.c.n)
     };
-    G.BmStatsPanelUpdate();
+    G.BMStatsPanelUpdate();
 };
 
 G.evolution = {};
@@ -201,7 +207,7 @@ G.RegisterBroadcast("ccBegin", function () {
     G.colony.elder = 2;
     G.colony.adult = 10;
     G.colony.young = 4;
-    G.eotw = 200;
+    G.eotw = 20;
     G.RemoveEntry(G.commands.unlocked, "settle");
     G.commands.hidden.push("force-end");
     G.commands.hidden.push("dev-add-colony");
@@ -215,7 +221,7 @@ G.RegisterBroadcast("ccEnd", function () {
     G.colony.elder = 0;
     G.colony.adult = 0;
     G.colony.young = 0;
-    G.eotw = 0;
+    G.eotw = -1;
     G.colony.name = "NO COLONY";
     G.commands.unlocked.push("settle");
     G.RemoveEntry(G.commands.hidden, "force-end");
@@ -249,6 +255,7 @@ G.RegisterBroadcast("bmConfirmAscend", function (args) {
         G.stats.xp = G.stats.xp + xpgain;
         G.consoleOutput.push(G.c.c("#0077dd") + "You gained " + xpgain + " xp points!" + G.c.n)
         G.stats.LevelUp();
+        G.Broadcast("ccEnd");
         return false
     };
     G.consoleOutput.push(G.c.c("#00afaf") + "Returning to your colony..." + G.c.n);
@@ -292,6 +299,14 @@ G.RegisterBroadcast("bmCheatHealth", function (args) {
     G.consoleOutput.push(G.c.c("#00ee00") + "Successfully cheated health value" + G.c.n);
     return true
 });
+G.RegisterBroadcast("ccTick", function () {
+    if (G.eotw == 5) {
+        G.consoleOutput.push(G.c.c("#ee4444") + "The ground rumbles... The end of the world is near..." + G.c.n);
+    } else if (G.eotw == 0) {
+        G.consoleOutput.push(G.c.c("#ff0000") + "THE END OF THE WORLD IS HERE<br>" + G.c.r("#ee4444") + "You are forced to ascend to avoid the terrors of the end." + G.c.n);
+        G.Broadcast("bmConfirmAscend","y");
+    };
+});
 
 //Initialize Functions
 G.BMColonyPanelUpdate = function () {
@@ -318,7 +333,7 @@ G.BMStatsPanelUpdate = function () {
         G.c.c("#00ccee") + "Skill Points: " + G.stats.skillpts + "<br>" + G.c.n +
         G.c.c("#00dddd") + "Talent Points: " + G.stats.talentpts + "<br>" + G.c.n +
         G.c.c("#00eecc") + "XP: " + G.stats.xp + "/" + G.stats.lvlup + "<br>" + G.c.n +
-        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 25) + G.c.n;
+        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 15) + G.c.n;
     statsPanel.innerHTML = writePanel;
 };
 

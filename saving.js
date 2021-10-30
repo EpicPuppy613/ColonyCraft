@@ -75,7 +75,7 @@ G.RegisterBroadcast("ccEnd", function () {
 });*/
 
 G.RegisterBroadcast("ccTick", function () {
-    console.log("A")
+    
 });
 
 /*
