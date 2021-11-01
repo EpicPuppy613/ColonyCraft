@@ -12,6 +12,7 @@ G.panelHeight = document.getElementById("panelHeight");
 G.modLoader = document.getElementById("modLoading");
 document.getElementById("game").style.display = "none";
 G.listening = false;
+G.highestPriority = {};
 G.listeningTo = "";
 G.commandDirectory = {};
 G.inventory = {};
@@ -69,6 +70,12 @@ G.FoodItem = function (name, catid, itemid, saturation, enjoyment, health, prior
     }
     this.count = 0;
     this.type = type;
+    if (G.highestPriority[type] === undefined) {
+        G.highestPriority[type] = 0;
+    };
+    if (G.highestPriority[type] < this.priority) {
+        G.highestPriority[type] = this.priority;
+    };
 };
 
 //Initialize Inventory Functions
@@ -119,6 +126,12 @@ G.GiveAllItems = function (amount) {
 };
 
 //Initialize General Functions
+G.RandInt = function (min, max) {
+    if (min > max) {
+        throw "ValueError: minimum value cannot be over maximum value";
+    }
+    return Math.floor(Math.random * (max - min + 1)) + min;
+};
 G.MatchArray = function (array, match) {
     if (array.indexOf(match) == -1) {
         return false
@@ -245,7 +258,7 @@ G.RegisterMod = function (modInfo) {
     console.log("[INFO] REGISTERED MOD: " + modInfo.modid);
     G.initializedMods.push(modInfo.modid);
 };
-G.GenBar = function (value, max, length, left = "", segment = "▮", empty = "▯", right = "") {
+G.GenBar = function (value, max, length, left = "", segment = "▰", empty = "▱", right = "") {
     var progress = value / max
     var barAmount = Math.round(progress * length)
     var output = left

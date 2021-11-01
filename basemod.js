@@ -8,7 +8,7 @@ G.RegisterMod({
     parents: ["saving"]
 });
 
-console.log("[INFO][bm] Initializing Objects")
+console.log("[INFO][bm] Initializing Objects");
 
 const firstTime = window.localStorage.getItem("firstTime");
 if (firstTime === null) {
@@ -17,6 +17,7 @@ if (firstTime === null) {
 //window.localStorage.setItem("firstTime",false);
 
 //Initialize Storage Objects
+G.storageEfficiency = 0.9;
 G.eotw = 0;
 
 G.colony = {};
@@ -90,11 +91,11 @@ G.evolution.research.needed = [0, 0, 0, 0];
 console.log("[INFO][bm] Initializing Inventory");
 G.inventory.food = new G.InventoryCategory(G.c.c("#00ef00") + "Food" + G.c.n, "food");
 G.inventory.liquids = new G.InventoryCategory(G.c.c("#4444ff") + "Liquids" + G.c.n, "liquids");
-G.inventory.primitive = new G.InventoryCategory("Primitive Materials", "primitive");
-G.inventory.basic = new G.InventoryCategory("Basic Materials", "basic");
-G.inventory.advanced = new G.InventoryCategory("Advanced Materials", "advanced");
-G.inventory.precious = new G.InventoryCategory("Precious Materials", "precious");
-G.inventory.electric = new G.InventoryCategory("Electric Components", "electric");
+G.inventory.primitive = new G.InventoryCategory(G.c.c("#964b00") + "Primitive Materials" + G.c.n, "primitive");
+G.inventory.basic = new G.InventoryCategory(G.c.c("#888888") + "Basic Materials" + G.c.n, "basic");
+G.inventory.advanced = new G.InventoryCategory(G.c.c("#bb00bb") + "Advanced Materials" + G.c.n, "advanced");
+G.inventory.precious = new G.InventoryCategory(G.c.c("#ffd700") + "Precious Materials" + G.c.n, "precious");
+G.inventory.electric = new G.InventoryCategory(G.c.c("#ff9333") + "Electronic Components" + G.c.n, "electric");
 G.inventory.equipment = new G.InventoryCategory("Equipment", "equipmet");
 G.inventory.other = new G.InventoryCategory("Other", "other");
 
@@ -107,17 +108,17 @@ maybe max is infinite?
 
 //Initialize Food
 G.inventory.food.items.push(new G.FoodItem("Fruit", "food", "fruit", 2, 1, 0, 3, "f"));
-G.inventory.food.items.push(new G.FoodItem("Cooked Meat", "food", "cooked-meat", 3, 2, 1, 2, "f"));
-G.inventory.food.items.push(new G.FoodItem("Raw Meat", "food", "raw-meat", 2, -2, -2, 5, "f"));
-G.inventory.food.items.push(new G.FoodItem("Cooked Fish", "food", "cooked-fish", 2, 2, 1, 2, "f"));
-G.inventory.food.items.push(new G.FoodItem("Raw Fish", "food", "raw-fish", 2, -2, -2, 5, "f"));
-G.inventory.food.items.push(new G.FoodItem("Wild Herbs", "food", "wild-herbs", 1, 0, 1, 3, "f"));
+G.inventory.food.items.push(new G.FoodItem("Cooked Meat", "food", "cooked-meat", 3, 2, 4, 5, "f"));
+G.inventory.food.items.push(new G.FoodItem("Raw Meat", "food", "raw-meat", 2, -2, -2, 1, "f"));
+G.inventory.food.items.push(new G.FoodItem("Cooked Fish", "food", "cooked-fish", 2, 2, 4, 5, "f"));
+G.inventory.food.items.push(new G.FoodItem("Raw Fish", "food", "raw-fish", 2, -2, -2, 1, "f"));
+G.inventory.food.items.push(new G.FoodItem("Wild Herbs", "food", "wild-herbs", 1, 0, 3, 3, "f"));
 
 //Initialize Liquids
-G.inventory.liquids.items.push(new G.FoodItem("Fresh Water", "liquids", "water", 2, 1, 1, 1, "l"));
+G.inventory.liquids.items.push(new G.FoodItem(G.c.c("#ccddff") + "Fresh Water" + G.c.n, "liquids", "water", 2, 1, 1, 3, "l"));
 G.inventory.liquids.items.push(new G.FoodItem("Dirty Water", "liquids", "mud-water", 1, -1, -1, 2, "l"));
-G.inventory.liquids.items.push(new G.FoodItem("Poisonious Water", "liquids", "poison-water", 1, -5, -5, 3, "l"));
-G.inventory.liquids.items.push(new G.FoodItem("Salt Water", "liquids", "salt-water", 1, -10, -10, 4, "l"));
+G.inventory.liquids.items.push(new G.FoodItem("Poisonious Water", "liquids", "poison-water", 1, -5, -5, 1, "l"));
+G.inventory.liquids.items.push(new G.FoodItem("Salt Water", "liquids", "salt-water", 1, -10, -10, 0, "l"));
 
 //Initialize Primitive Materials
 G.inventory.primitive.items.push(new G.InventoryItem("Sticks", "primitive", "sticks"));
@@ -137,18 +138,21 @@ G.inventory.basic.items.push(new G.InventoryItem("Metal Bar", "basic", "metal-ba
 G.inventory.advanced.items.push(new G.InventoryItem("Planks", "advanced", "planks"));
 G.inventory.advanced.items.push(new G.InventoryItem("Marble", "advanced", "marble"));
 G.inventory.advanced.items.push(new G.InventoryItem("Granite", "advanced", "granite"));
-G.inventory.advanced.items.push(new G.InventoryItem("Gold Ore", "advanced", "gold-ore"));
+G.inventory.advanced.items.push(new G.InventoryItem(G.c.c("#ffeebb") + "Gold Ore" + G.c.n, "advanced", "gold-ore"));
+G.inventory.advanced.items.push(new G.InventoryItem(G.c.c("#bbeeff") + "Rough Diamond" + G.c.n, "advanced", "rough-diamond")); 4
 
 //Initialize Precious Materials
-G.inventory.precious.items.push(new G.InventoryItem("Gold Bar", "precious", "gold-bar"));
-G.inventory.precious.items.push(new G.InventoryItem("Cut Marble", "precious", "cut-marble"));
-G.inventory.precious.items.push(new G.InventoryItem("Cut Granite", "precious", "cut-granite"));
+G.inventory.precious.items.push(new G.InventoryItem("Marble Block", "precious", "marble-block"));
+G.inventory.precious.items.push(new G.InventoryItem("Granite Block", "precious", "granite-block"));
+G.inventory.precious.items.push(new G.InventoryItem("Quartz Block", "precious", "quartz-block"));
+G.inventory.precious.items.push(new G.InventoryItem(G.c.c("#ffdd66") + "Gold Bar" + G.c.n, "precious", "gold-bar"));
+G.inventory.precious.items.push(new G.InventoryItem(G.c.c("#66ddff") + "Fine Diamond" + G.c.n, "precious", "fine-diamond"));
 
 //Initialize Electrical Components
-G.inventory.electric.items.push(new G.InventoryItem("Copper Ore", "electric", "copper-ore"));
-G.inventory.electric.items.push(new G.InventoryItem("Copper Bar", "electric", "copper-bar"));
-G.inventory.electric.items.push(new G.InventoryItem("Copper Wire", "electric", "copper-wire"));
-G.inventory.electric.items.push(new G.InventoryItem("Circuit Board", "electric", "circuit-board"));
+G.inventory.electric.items.push(new G.InventoryItem(G.c.c("#ffccaa") + "Copper Ore" + G.c.n, "electric", "copper-ore"));
+G.inventory.electric.items.push(new G.InventoryItem(G.c.c("#ffbb77") + "Copper Bar" + G.c.n, "electric", "copper-bar"));
+G.inventory.electric.items.push(new G.InventoryItem(G.c.c("#ffaa55") + "Copper Wire" + G.c.n, "electric", "copper-wire"));
+G.inventory.electric.items.push(new G.InventoryItem(G.c.c("#55ee55") + "Circuit Board" + G.c.n, "electric", "circuit-board"));
 
 console.log("[INFO][bm] Initializing Functions");
 
@@ -177,21 +181,21 @@ G.RegisterCommand("Ascend", "ascend and abandon your colony", "ascend", "ascend"
     G.listening = true;
     G.listeningTo = "bmConfirmAscend";
 });
-G.RegisterCommand("Force End", "force end the game", "force_end", "force-end", function () {
+G.RegisterCommand("Force End", "force end the game", "forceEnd", "force-end", function () {
     G.consoleOutput.push("GAME ENDED");
     G.Broadcast("ccEnd");
 });
-G.RegisterCommand("Dev Add Colonists", "cheat in some extra colonists", "dev_add_colony", "dev-add-colony", function () {
+G.RegisterCommand("Dev Add Colonists", "cheat in some extra colonists", "devAddColony", "dev-add-colony", function () {
     G.consoleOutput.push("How many colonists to cheat in?");
     G.listening = true;
     G.listeningTo = "bmCheatColonists";
 });
-G.RegisterCommand("Dev Set Morale", "cheat by setting the morale value", "dev_set_morale", "dev-set-morale", function () {
+G.RegisterCommand("Dev Set Morale", "cheat by setting the morale value", "devSetMorale", "dev-set-morale", function () {
     G.consoleOutput.push("What value to set morale to? (Previously " + G.colony.morale + ")");
     G.listening = true;
     G.listeningTo = "bmCheatMorale";
 });
-G.RegisterCommand("Dev Set Health", "chest by settings the health value", "dev_set_health", "dev-set-health", function () {
+G.RegisterCommand("Dev Set Health", "chest by settings the health value", "devSetHealth", "dev-set-health", function () {
     G.consoleOutput.push("What value to set health to? (Previously " + G.colony.health + ")");
     G.listening = true;
     G.listeningTo = "bmCheatHealth";
@@ -201,13 +205,16 @@ G.RegisterCommand("Tick Game", "progress the game time by 1 year", "tick", "tick
     G.eotw--;
     G.Broadcast("ccTick");
 });
+G.RegisterCommand("Tutorial", "shows a quick tutorial of the game", "tutorial", "tutorial", function () {
+    G.consoleOutput.push("Tutorial not implemented yet. oof")
+}, true);
 
 //Initialize Events
 G.RegisterBroadcast("ccBegin", function () {
     G.colony.elder = 2;
     G.colony.adult = 10;
     G.colony.young = 4;
-    G.eotw = 20;
+    G.eotw = 200;
     G.RemoveEntry(G.commands.unlocked, "settle");
     G.commands.hidden.push("force-end");
     G.commands.hidden.push("dev-add-colony");
@@ -300,11 +307,17 @@ G.RegisterBroadcast("bmCheatHealth", function (args) {
     return true
 });
 G.RegisterBroadcast("ccTick", function () {
+    G.BMColonyConsume("f", "food");
+    G.BMColonyConsume("l", "water");
+    G.BMConditionUpdate();
+    G.BMInventoryDecay();
+    G.BMColonyPanelUpdate();
+    G.BMInvPanelUpdate();
     if (G.eotw == 5) {
         G.consoleOutput.push(G.c.c("#ee4444") + "The ground rumbles... The end of the world is near..." + G.c.n);
     } else if (G.eotw == 0) {
         G.consoleOutput.push(G.c.c("#ff0000") + "THE END OF THE WORLD IS HERE<br>" + G.c.r("#ee4444") + "You are forced to ascend to avoid the terrors of the end." + G.c.n);
-        G.Broadcast("bmConfirmAscend","y");
+        G.Broadcast("bmConfirmAscend", "y");
     };
 });
 
@@ -333,7 +346,7 @@ G.BMStatsPanelUpdate = function () {
         G.c.c("#00ccee") + "Skill Points: " + G.stats.skillpts + "<br>" + G.c.n +
         G.c.c("#00dddd") + "Talent Points: " + G.stats.talentpts + "<br>" + G.c.n +
         G.c.c("#00eecc") + "XP: " + G.stats.xp + "/" + G.stats.lvlup + "<br>" + G.c.n +
-        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 15) + G.c.n;
+        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 10) + G.c.n;
     statsPanel.innerHTML = writePanel;
 };
 
@@ -393,6 +406,65 @@ G.BMConditionUpdate = function () {
     G.colony.colorOverall = "rgb(" + (255 - subROverall) + "," + (255 - subGOverall) + ",0)";
 };
 
+G.BMPopulationUpdate = function () {
+    
+};
+
+G.BMColonyConsume = function (type, name, adultmodifier = 1, eldermodifier = 1, youngmodifier = 0.5, moralemodifier = 10, healthmodifier = 10) {
+    const consumeAmount = Math.round(G.colony.adult * adultmodifier) + Math.round(G.colony.elder * eldermodifier) + Math.round(G.colony.young * youngmodifier);
+    var currentConsume = 0;
+    var moraleChange = 0;
+    var healthChange = 0;
+    for (var currentPriority = G.highestPriority[type]; currentPriority >= 0; currentPriority--) {
+        var priorityList = [];
+        for (category of Object.keys(G.inventory)) {
+            for (item of G.inventory[category].items) {
+                if (item instanceof G.FoodItem) {
+                    if (item.type == type && item.priority == currentPriority) {
+                        priorityList.push(item);
+                    }
+                }
+            }
+        }
+        while (!(G.CategoryIsEmpty({ items: priorityList }))) {
+            var randomIndex = Math.floor(Math.random() * priorityList.length);
+            var chosenItem = priorityList[randomIndex];
+            if (chosenItem.count <= 0) {
+                continue;
+            }
+            currentConsume = currentConsume + chosenItem.saturation;
+            chosenItem.count--;
+            moraleChange = moraleChange + ((chosenItem.enjoyment * moralemodifier) / consumeAmount);
+            healthChange = healthChange + ((chosenItem.health * healthmodifier) / consumeAmount);
+            if (currentConsume >= consumeAmount) {
+                break;
+            }
+        }
+        if (currentConsume >= consumeAmount) {
+            break;
+        }
+    }
+    if (currentConsume < consumeAmount) {
+        moraleChange = moraleChange - (consumeAmount - currentConsume);
+        healthChange = healthChange - (consumeAmount - currentConsume);
+        G.consoleOutput.push(G.c.c("#ff7777") + "Your colony is not getting enough " + name + G.c.n);
+    }
+    G.consoleOutput.push(G.c.c("#ff77ff") + "After consuming " + name + 
+    ", colony morale has been changed by " + Math.round(moraleChange / 10) + "% and colony health has been changed by " + 
+    Math.round(healthChange / 10) + "%." + G.c.n);
+    G.colony.morale = G.colony.morale + moraleChange;
+    G.colony.health = G.colony.health + healthChange;
+};
+
+G.BMInventoryDecay = function () {
+    for (category of Object.keys(G.inventory)) {
+        for (item of G.inventory[category].items) {
+            item.count = Math.round(item.count * G.storageEfficiency);
+        }
+    }
+    G.consoleOutput.push(G.c.c("#ffcc77") + Math.round((1 - G.storageEfficiency) * 100) + "% of all items in your inventory have decayed." + G.c.n);
+};
+
 //Initialize Panels
 G.InitializePanel("colony");
 document.getElementById("colony").innerHTML = "-[COLONY INFO]-<br>NO ACTIVE COLONY";
@@ -402,7 +474,7 @@ G.InitializePanel("stats");
 document.getElementById("stats").style.textAlign = "center";
 G.BMStatsPanelUpdate();
 
-G.GiveAllItems(5);
+G.GiveAllItems(15);
 G.InitializePanel("inv");
 document.getElementById("inv").style.textAlign = "center";
 G.BMInvPanelUpdate();

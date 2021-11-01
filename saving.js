@@ -72,11 +72,11 @@ G.RegisterBroadcast("ccBegin", function () {
 
 G.RegisterBroadcast("ccEnd", function () {
     G.modFunctions["saveAuto"]();
-});*/
+});
 
 G.RegisterBroadcast("ccTick", function () {
     
-});
+});*/
 
 /*
 SAVE SYSTEM OVERVIEW
