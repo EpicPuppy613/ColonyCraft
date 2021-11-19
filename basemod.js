@@ -21,10 +21,13 @@ if (firstTime === null) {
 //window.localStorage.setItem("firstTime",false);
 
 //Initialize Storage Objects
+G.chosenJob = "";
+G.availableJobs = [];
+
 G.dataToSave.push("colony");
 G.dataToSave.push("jobs");
 G.dataToSave.push("stats");
-G.dataToSave.push("evolution");
+G.dataToSave.push("evodata");
 G.storageEfficiency = 0.9;
 G.eotw = 0;
 
@@ -105,21 +108,22 @@ G.stats.LevelUp = function () {
 };
 
 G.evolution = {};
-G.evolution.researches = [];
-G.evolution.researchesResearched = [];
-G.evolution.traits = [];
-G.evolution.traitsEvolved = [];
-G.evolution.skills = [];
-G.evolution.skillsLearned = [];
-G.evolution.talents = [];
-G.evolution.talentsLearned = [];
+G.evodata = {};
+G.evodata.researches = [];
+G.evodata.researchesResearched = [];
+G.evodata.traits = [];
+G.evodata.traitsEvolved = [];
+G.evodata.skills = [];
+G.evodata.skillsLearned = [];
+G.evodata.talents = [];
+G.evodata.talentsLearned = [];
 /**
  * Add a new skill
  * @param {object} skill - The skill object to add
  * Returns evolution object for chaining
  */
 G.evolution.AddSkill = function (skill) {
-    this.skills.push(skill);
+    G.evodata.skills.push(skill);
     return this;
 }
 /**
@@ -131,7 +135,7 @@ G.evolution.AddSkill = function (skill) {
  * @param {string} desc - The description of the skill
  * @param {string} color - [optional] The color to use for the skill
  */
-G.evolution.SkillTemplate = function (name, id, req, cost, desc, color="#ffffff") {
+G.evolution.SkillTemplate = function (name, id, req, cost, desc, color = "#ffffff") {
     this.name = name;
     this.id = id;
     this.req = req;
@@ -145,7 +149,7 @@ G.evolution.SkillTemplate = function (name, id, req, cost, desc, color="#ffffff"
  * Returns evolution object for chaining
  */
 G.evolution.AddTalent = function (talent) {
-    this.talents.push(talent);
+    G.evodata.talents.push(talent);
     return this;
 }
 /**
@@ -157,7 +161,7 @@ G.evolution.AddTalent = function (talent) {
  * @param {string} desc - The description of the talent
  * @param {string} color - [optional] The color to use for the talent
  */
-G.evolution.TalentTemplate = function (name, id, req, cost, desc, color="#ffffff") {
+G.evolution.TalentTemplate = function (name, id, req, cost, desc, color = "#ffffff") {
     this.name = name;
     this.id = id;
     this.req = req;
@@ -165,17 +169,17 @@ G.evolution.TalentTemplate = function (name, id, req, cost, desc, color="#ffffff
     this.desc = desc;
     this.color = color;
 }
-G.evolution.trait = {};
-G.evolution.trait.current = null;
-G.evolution.trait.progress = 0;
-G.evolution.trait.needed = 0;
+G.evodata.trait = {};
+G.evodata.trait.current = null;
+G.evodata.trait.progress = 0;
+G.evodata.trait.needed = 0;
 /**
  * Add a new trait
  * @param {object} trait - The trait object to add
  * Returns evolution object for chaining
  */
 G.evolution.AddTrait = function (trait) {
-    this.traits.push(trait);
+    G.evodata.traits.push(trait);
     return this;
 }
 /**
@@ -187,7 +191,7 @@ G.evolution.AddTrait = function (trait) {
  * @param {string} desc - The description of the trait
  * @param {string} color - [optional] The color to use for the trait
  */
-G.evolution.TraitTemplate = function (name, id, req, cost, desc, color="#ffffff") {
+G.evolution.TraitTemplate = function (name, id, req, cost, desc, color = "#ffffff") {
     this.name = name;
     this.id = id;
     this.req = req;
@@ -195,17 +199,17 @@ G.evolution.TraitTemplate = function (name, id, req, cost, desc, color="#ffffff"
     this.desc = desc;
     this.color = color;
 }
-G.evolution.research = {};
-G.evolution.research.current = null;
-G.evolution.research.progress = [0, 0, 0, 0];
-G.evolution.research.needed = [0, 0, 0, 0];
+G.evodata.research = {};
+G.evodata.research.current = null;
+G.evodata.research.progress = [0, 0, 0, 0];
+G.evodata.research.needed = [0, 0, 0, 0];
 /**
  * Add a new research
  * @param {object} research - The research object to add
  * Returns evolution object for chaining
  */
 G.evolution.AddResearch = function (research) {
-    this.researches.push(research);
+    G.evodata.researches.push(research);
     return this;
 }
 /**
@@ -217,13 +221,21 @@ G.evolution.AddResearch = function (research) {
  * @param {string} desc - The description of the research
  * @param {string} color - [optional] The color to use for the research
  */
-G.evolution.ResearchTemplate = function (name, id, requirements, cost, desc, color="#ffffff") {
+G.evolution.ResearchTemplate = function (name, id, requirements, cost, desc, color = "#ffffff") {
     this.name = name;
     this.id = id;
     this.req = requirements;
     this.cost = cost;
     this.desc = desc;
     this.color = color;
+}
+G.evolution.FindResearchById = function (id) {
+    for (e = 0; e < G.evodata.researches.length; e++) {
+        if (G.evodata.researches[e].id == id) {
+            return G.evodata.researches[e];
+        }
+    }
+    return null;
 }
 
 //Initialize Jobs
@@ -607,40 +619,40 @@ G.RegisterBroadcast("bmResearchOption", function () {
         G.consoleOutput.push(G.c.c("#ffaa88") + "Cancelled" + G.c.n);
         return;
     } else if (value == 3) {
-        if (G.evolution.researchesResearched.length == 0) {
+        if (G.evodata.researchesResearched.length == 0) {
             G.consoleOutput.push(G.c.c("dodgerblue") + "You have no researched technologies." + G.c.n);
             return;
         };
         G.consoleOutput.push(G.c.c("dodgerblue") + "- [Researched Technologies] -" + G.c.n);
-        for (const technology of G.evolution.researches) {
-            if (G.MatchArray(G.evolution.researchesResearched, technology.id)) {
+        for (const technology of G.evodata.researches) {
+            if (G.MatchArray(G.evodata.researchesResearched, technology.id)) {
                 G.consoleOutput.push("- " + technology.name + " - " + technology.desc);
             }
         }
     } else if (value == 1) {
-        if (G.evolution.research.current == null) {
+        if (G.evodata.research.current == null) {
             G.consoleOutput.push(G.c.c("#ff6644") + "You do not have an active research." + G.c.n);
             return;
         }
-        G.listeningDropdown = G.consoleOutput.push(G.c.c("cadetblue") + 
-            "Are you sure you want to cancel the current research? All current research progress will be lost. " + 
+        G.listeningDropdown = G.consoleOutput.push(G.c.c("magenta") +
+            "Are you sure you want to cancel the current research? All current research progress will be lost. " + G.c.n +
             '<select id="dropdown"><option value="-1" style="color: orange">No</option><option value="0" style="color: red">Yes</option></select>');
         G.listening = true;
         G.listeningTo = "bmResearchCancel";
     } else if (value == 2) {
-        if (G.evolution.research.current != null) {
+        if (G.evodata.research.current != null) {
             G.consoleOutput.push(G.c.c("#ff6644") + "You already have an active research." + G.c.n);
             return;
         }
         G.listeningDropdown = G.consoleOutput.push()
         var options = [];
-        for (const research of G.evolution.researches) {
-            if (G.MatchArray(G.evolution.researchesResearched, research.id)) {
+        for (const research of G.evodata.researches) {
+            if (G.MatchArray(G.evodata.researchesResearched, research.id)) {
                 continue;
             }
             var researchable = true;
             for (const requirement of research.req) {
-                if (!(G.MatchArray(G.evolution.researchesResearched, requirement))) {
+                if (!(G.MatchArray(G.evodata.researchesResearched, requirement))) {
                     researchable = false;
                 }
             }
@@ -652,7 +664,7 @@ G.RegisterBroadcast("bmResearchOption", function () {
         if (options.length == 0) {
             G.consoleOutput.push(G.c.c("#ff6644") + "There is nothing to research." + G.c.n);
         }
-        var researchDropdown = 'What do you want to research? <select id="dropdown"><option value="-1" style="color:red">Cancel</option>';
+        var researchDropdown = G.c.c("deepskyblue") + 'What do you want to research? <select id="dropdown"><option value="-1" style="color:red">Cancel</option>' + G.c.n;
         for (i = 0; i < options.length; i++) {
             researchDropdown += '<option value="' + i + '" style="color:' + options[i].color + '">' + options[i].name + "</option>";
         }
@@ -664,11 +676,51 @@ G.RegisterBroadcast("bmResearchOption", function () {
 });
 
 G.RegisterBroadcast("bmSelectResearch", function () {
-    
+    const researchChoice = document.getElementById("dropdown").value;
+    var options = [];
+    for (const research of G.evodata.researches) {
+        if (G.MatchArray(G.evodata.researchesResearched, research.id)) {
+            continue;
+        }
+        var researchable = true;
+        for (const requirement of research.req) {
+            if (!(G.MatchArray(G.evodata.researchesResearched, requirement))) {
+                researchable = false;
+            }
+        }
+        if (!researchable) {
+            continue;
+        }
+        options.push(research);
+    }
+    const selectedResearch = options[researchChoice];
+    G.consoleOutput[G.listeningDropdown - 1] = G.c.c("deepskyblue") + 'What do you want to research? <select disabled="true"><option>' + selectedResearch.name + '</option></select>' + G.c.n;
+    G.listeningDropdown = "";
+    G.evodata.research.current = selectedResearch.id;
+    G.evodata.research.needed = selectedResearch.cost;
+    G.evodata.research.progress = [0, 0, 0, 0];
+    G.consoleOutput.push(G.c.c("lawngreen") + "Research Started" + G.c.n);
+    G.BMEvoPanelUpdate();
 });
 
 G.RegisterBroadcast("bmResearchCancel", function () {
-
+    const cancelResearch = document.getElementById("dropdown").value;
+    if (cancelResearch == 0) {
+        G.evodata.research.current = null;
+        G.evodata.research.progress = [0, 0, 0, 0];
+        G.evodata.research.needed = [0, 0, 0, 0];
+        G.consoleOutput.push(G.c.c("darkred") + "The current research has been cancelled" + G.c.n);
+        G.consoleOutput[G.listeningDropdown - 1] = G.c.c("magenta") +
+            "Are you sure you want to cancel the current research? All current research progress will be lost. " + G.c.n +
+            '<select disabled="true"><option>Yes</option></select>'
+    } else {
+        G.consoleOutput.push(G.c.c("darkcyan") + "Returning to colony..." + G.c.n);
+        G.consoleOutput[G.listeningDropdown - 1] = G.c.c("magenta") +
+            "Are you sure you want to cancel the current research? All current research progress will be lost. " + G.c.n +
+            '<select disabled="true"><option>No</option></select>'
+    }
+    G.listeningDropdown = "";
+    G.BMEvoPanelUpdate();
 });
 
 G.RegisterBroadcast("bmChooseJob", function () {
@@ -846,7 +898,7 @@ G.RegisterBroadcast("bmConfirmAscend", function (args) {
             return;
         };
         var xpgain = G.colony.adult + G.colony.elder + G.colony.young;
-        xpgain += G.evolution.researchesResearched.length * 25 + G.evolution.traitsEvolved.length * 25;
+        xpgain += G.evodata.researchesResearched.length * 25 + G.evodata.traitsEvolved.length * 25;
         G.stats.xp += xpgain;
         G.consoleOutput.push(G.c.c("#0077dd") + "You gained " + xpgain + " xp points!" + G.c.n)
         G.stats.LevelUp();
@@ -931,6 +983,7 @@ G.RegisterBroadcast("saveLoaded", function () {
     };
     G.BMInvPanelUpdate();
     G.BMStatsPanelUpdate();
+    G.BMEvoPanelUpdate();
 });
 
 //Initialize Functions
@@ -1018,6 +1071,10 @@ G.BMConditionUpdate = function () {
     G.colony.colorOverall = "rgb(" + (255 - subROverall) + "," + (255 - subGOverall) + ",0)";
 };
 
+G.BMEvolutionUpdate = function () {
+    
+}
+
 G.BMPopulationUpdate = function () {
     const deathAmt = Math.round(((G.RandBetween(10, 20) / 100) * (2 ** (-G.colony.health / 1000))) * G.colony.elder);
     const ageAmt = Math.round((G.RandBetween(4, 15) / 100) * G.colony.adult);
@@ -1090,23 +1147,23 @@ G.BMInventoryDecay = function () {
 
 G.BMEvoPanelUpdate = function () {
     var newPanel = G.c.c("lawngreen") + "- [RESEARCH] -<br>";
-    if (G.evolution.research.current == null) {
+    if (G.evodata.research.current == null) {
         newPanel += G.c.r("darkorange") + "NO ACTIVE RESEARCH<br>";
     } else {
-        newPanel += G.c.n + G.evolution.research.current.name;
+        newPanel += G.c.n + G.evolution.FindResearchById(G.evodata.research.current).name + "<br>";
         const types = ["Invention", "Math", "Science", "Aerospace"];
         const colors = ["paleturquoise", "palegoldenrod", "palegreen", "palevioletred"];
         for (i = 0; i < 4; i++) {
-            if (G.evolution.research.needed[i] == 0) {
+            if (G.evodata.research.needed[i] == 0) {
                 continue;
             }
             newPanel += G.c.c(colors[i]) + types[i] + " " +
-                G.evolution.research.progress[i] + "/" + G.evolution.research.needed[i] +
-                "<br>" + G.GenBar(G.evolution.research.progress[i], G.evolution.research.needed[i], 10) + G.c.n;
+            G.evodata.research.progress[i] + "/" + G.evodata.research.needed[i] +
+                "<br>" + G.GenBar(G.evodata.research.progress[i], G.evodata.research.needed[i], 10) + G.c.n;
         }
     }
     newPanel += G.c.r("mediumspringgreen") + "<br>- [TRAITS] -<br>";
-    if (G.evolution.trait.current == null) {
+    if (G.evodata.trait.current == null) {
         newPanel += G.c.r("darkorange") + "NO ACTIVE TRAIT<br>";
     }
     document.getElementById("evo").innerHTML = newPanel;
