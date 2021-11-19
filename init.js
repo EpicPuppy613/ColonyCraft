@@ -54,7 +54,7 @@ G.logger.time = function () {
  */
 G.logger.info = function (info, mod=null) {
     if (mod != null) {
-        console.log("[" + G.logger.time() + "][INFO][" + mod + "] " + info);
+        console.log("[" + G.logger.time() + "][INFO/" + mod + "] " + info);
     } else {
         console.log("[" + G.logger.time() + "][INFO] " + info);
     }
@@ -65,7 +65,7 @@ G.logger.info = function (info, mod=null) {
  */
 G.logger.error = function (error, mod=null, crash=false) {
     if (mod != null) {
-        console.error("\u001b[31m[" + G.logger.time() + "][ERR][" + mod + "]" + error + "\u001b[0m");
+        console.error("\u001b[31m[" + G.logger.time() + "][ERR/" + mod + "]" + error + "\u001b[0m");
     } else {
         console.error("\u001b[31m[" + G.logger.time() + "][ERR] " + error + "\u001b[0m");
     }
@@ -78,7 +78,7 @@ G.logger.error = function (error, mod=null, crash=false) {
  */
 G.logger.warn = function (warn, mod=null) {
     if (mod != null) {
-        console.warn("\u001b[33m[" + G.logger.time() + "][WARN][" + mod + "] " + warn + "\u001b[0m");
+        console.warn("\u001b[33m[" + G.logger.time() + "][WARN/" + mod + "] " + warn + "\u001b[0m");
     } else {
         console.warn("\u001b[33m[" + G.logger.time() + "][WARN] " + warn + "\u001b[0m")
     }
@@ -417,7 +417,11 @@ G.RunCommand = function (command) {
  * Broadcasts a event and executes all functions with that event
  */
 G.Broadcast = function (broadcast, args) {
-    toBroadcast = G.broadcastDirectory[broadcast]; //Returns array of functions to run
+    const toBroadcast = G.broadcastDirectory[broadcast]; //Returns array of functions to run
+    if (toBroadcast == undefined) {
+        G.logger.warn(broadcast + " does not exist", "BROADCAST");
+        return;
+    }
     G.logger.info(broadcast, "BROADCAST");
     for (x = 0; x < toBroadcast.length; x++) {
         toBroadcast[x](args);

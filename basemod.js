@@ -338,15 +338,15 @@ G.evolution
         "Make sure that your colony doesn't die", "#33ff33"))
     .AddResearch(new G.evolution.ResearchTemplate("Production", "production", [], [30, 0, 0, 0],
         "Production of more complex materials", "#ffff33"))
-    .AddResearch(new G.evolution.ResearchTemplate("Advanced Invention", "adv-inv", ["intuition"], [50, 0, 0, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Advanced Invention", "advInv", ["intuition"], [50, 0, 0, 0],
         "Dedicated inventors to invent more things", '#33ffff'))
     .AddResearch(new G.evolution.ResearchTemplate("Theory of Mathematics", "ToMath", ["intuition"], [40, 0, 0, 0],
         "The concept of taking two numbers and changing them", "#33ffff"))
-    .AddResearch(new G.evolution.ResearchTemplate("Advanced Mathematics", "adv-math", ["ToMath", "crafting", "electronics"], [100, 50, 0, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Advanced Mathematics", "advMath", ["ToMath", "crafting", "electronics"], [100, 50, 0, 0],
         "Making computers do the math for us is a lot easier", "#33ffff"))
     .AddResearch(new G.evolution.ResearchTemplate("Theory of Science", "ToSci", ["ToM"], [75, 35, 0, 0],
         "Knowledge of the world around us", "#33ffff"))
-    .AddResearch(new G.evolution.ResearchTemplate("Advanced Science", "adv-sci", ["ToSci", "building", "optics"], [200, 125, 75, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Advanced Science", "advSci", ["ToSci", "building", "optics"], [200, 125, 75, 0],
         "Dedicated science labs to do science stuff", "#33ffff"))
     .AddResearch(new G.evolution.ResearchTemplate("Theory of Aviation", "ToAvi", ["ToSci"], [150, 100, 75, 0],
         "People should not be able to fly... but now we can", "#33ffff"))
@@ -368,7 +368,7 @@ G.evolution
         "Makes fires to keep the colony warm", "#33ff33"))
     .AddResearch(new G.evolution.ResearchTemplate("Filtering", "filtering", ["firemaking"], [75, 0, 0, 0],
         "Boiling and using mesh filters to make water clean", "#33ff33"))
-    .AddResearch(new G.evolution.ResearchTemplate("Water Collector", "water-collector", ["survival"], [40, 0, 0, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Water Collecting", "waterCollecting", ["survival"], [40, 0, 0, 0],
         "Dedicated people to collect water for the colony", "#33ff33"))
     .AddResearch(new G.evolution.ResearchTemplate("Smoking", "smoking", ["firemaking"], [75, 0, 0, 0],
         "Smoking food to make it taste better", "#33ff33"))
@@ -954,6 +954,7 @@ G.RegisterBroadcast("ccTick", function () {
         }
         G.tables[rollJob.loot.table].Roll(Math.round(rollJob.count * rollJob.loot.rolls * G.colony.modifierWork));
     }
+    G.BMEvolutionUpdate();
     G.BMColonyConsume("f", "food");
     G.BMColonyConsume("l", "water");
     G.BMConditionUpdate();
@@ -961,6 +962,7 @@ G.RegisterBroadcast("ccTick", function () {
     G.BMInventoryDecay();
     G.BMColonyPanelUpdate();
     G.BMInvPanelUpdate();
+    G.BMEvoPanelUpdate();
     if ((G.colony.adult + G.colony.elder + G.colony.young) <= 8) {
         G.consoleOutput.push(G.c.c("#ff0000") + "Your colony is dying, there is no hope left, you abandon your colony to try again." + G.c.n);
         G.Broadcast("ccEnd");
@@ -1072,7 +1074,30 @@ G.BMConditionUpdate = function () {
 };
 
 G.BMEvolutionUpdate = function () {
-    
+    if (G.evodata.research.current == null) {
+        return;
+    }
+    const inventionOutput = Math.round(((G.jobs.all.thinker.count * 5) + (G.jobs.all.inventor.count * 15)) * G.colony.modifierWork);
+    const mathOutput = Math.round((G.jobs.all.mathematician.count * 5) * G.colony.modifierWork);
+    const scienceOutput = Math.round((G.jobs.all.scientist.count * 5) * G.colony.modifierWork);
+    const aerospaceOutput = Math.round((G.jobs.all.aviator.count * 5) * G.colony.modifierWork);
+    G.evodata.research.progress[0] = Math.min(G.evodata.research.progress[0] + inventionOutput, G.evodata.research.needed[0]);
+    G.evodata.research.progress[1] = Math.min(G.evodata.research.progress[1] + mathOutput, G.evodata.research.needed[1]);
+    G.evodata.research.progress[2] = Math.min(G.evodata.research.progress[2] + scienceOutput, G.evodata.research.needed[2]);
+    G.evodata.research.progress[3] = Math.min(G.evodata.research.progress[3] + aerospaceOutput, G.evodata.research.needed[3]);
+    if (
+        G.evodata.research.progress[0] >= G.evodata.research.needed[0] &&
+        G.evodata.research.progress[1] >= G.evodata.research.needed[1] &&
+        G.evodata.research.progress[2] >= G.evodata.research.needed[2] &&
+        G.evodata.research.progress[3] >= G.evodata.research.needed[3]
+    ) {
+        G.logger.info("Research Complete: " + G.evodata.research.current, "bm");
+        G.evodata.research.progress = [0, 0, 0, 0];
+        G.evodata.research.needed = [0, 0, 0, 0];
+        G.evodata.researchesResearched.push(G.evodata.research.current);
+        G.Broadcast("res" + G.evodata.research.current.charAt(0).toUpperCase() + G.evodata.research.current.slice(1));
+        G.evodata.research.current = null;
+    }
 }
 
 G.BMPopulationUpdate = function () {
