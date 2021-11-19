@@ -12,12 +12,13 @@ html {
 }
 
 #commandInput {
-    width: 95%;
+    width: 50%;
+    font-family: 'Source Code Pro', monospace;
 }
 
 #consoleContainer {
     padding: 5px;
-    background-color: black
+    background-color: black;
 }
 
 #panels {
@@ -56,4 +57,13 @@ html {
 
 #settings {
     margin: 5px;
+}
+
+select {
+    font-family: 'Source Code Pro', monospace;
+}
+
+option {
+    font-family: 'Source Code Pro', monospace;
+    background: black;
 }

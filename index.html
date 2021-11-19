@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width">
     <title>ColonyCraft</title>
     <link href="style.css" rel="stylesheet" type="text/css"/>
-    <link rel="icon" type="image/icon" href="https://img.icons8.com/external-kiranshastry-gradient-kiranshastry/64/000000/external-flag-outdoor-kiranshastry-gradient-kiranshastry-1.png"/>
+    <link rel="icon" type="image/icon" href="ccIcon.png"/>
   </head>
   <body>
     <div id="game">
@@ -15,7 +15,9 @@
             <p id="console">
                 
             </p>
-            > <input maxlength="75" id="commandInput"/>
+            <div id="inputContainer">
+                > <input autocomplete="off" maxlength="75" id="commandInput"/>
+            </div>
         </div>
         <div id="settings">
             <strong>Settings</strong><br>
@@ -27,8 +29,8 @@
         </div>
     </div>
     <div id="loading">
-        <h2>Game loading, please wait...</h2>    
-        <progress style="width: 50%">
+        <h2>Game loading, please wait...</h2>
+        <img src="ccIcon.gif" height=192><br>
         <h3 style="color: #dd0000" id="loadErrors"></h3>
     </div> 
     <script src="init.js"></script>
