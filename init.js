@@ -65,9 +65,9 @@ G.logger.info = function (info, mod=null) {
  */
 G.logger.error = function (error, mod=null, crash=false) {
     if (mod != null) {
-        console.log("\u001b[31m[" + G.logger.time() + "][ERR][" + mod + "]" + error + "\u001b[0m");
+        console.error("\u001b[31m[" + G.logger.time() + "][ERR][" + mod + "]" + error + "\u001b[0m");
     } else {
-        console.log("\u001b[31m[" + G.logger.time() + "][ERR] " + error + "\u001b[0m");
+        console.error("\u001b[31m[" + G.logger.time() + "][ERR] " + error + "\u001b[0m");
     }
     if (crash) {
         throw error;
@@ -78,9 +78,9 @@ G.logger.error = function (error, mod=null, crash=false) {
  */
 G.logger.warn = function (warn, mod=null) {
     if (mod != null) {
-        console.log("\u001b[33m[" + G.logger.time() + "][WARN][" + mod + "] " + warn + "\u001b[0m");
+        console.warn("\u001b[33m[" + G.logger.time() + "][WARN][" + mod + "] " + warn + "\u001b[0m");
     } else {
-        console.log("\u001b[33m[" + G.logger.time() + "][WARN] " + warn + "\u001b[0m")
+        console.warn("\u001b[33m[" + G.logger.time() + "][WARN] " + warn + "\u001b[0m")
     }
 }
 console.log("//LOGGER INITIALIZED: " + G.logger.time() + "//");
