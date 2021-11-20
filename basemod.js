@@ -1,4 +1,4 @@
-G.logger.info("REGISTERING MOD", "bm");
+    G.logger.info("REGISTERING MOD", "bm");
 G.RegisterMod({
     name: "Basemod",
     version: "1.1.0",
@@ -101,7 +101,7 @@ G.stats.LevelUp = function () {
     };
     if (levels > 0) {
         G.consoleOutput.push(G.c.c("#00dddd") +
-            "You leveled up " + levels + " times! You gain " + skillgain + " skill points and " + talentgain + " talent points"
+            `You leveled up ${levels} times! You gain ${skillgain} skill points and ${talentgain} talent points`
             + G.c.n)
     };
     G.BMStatsPanelUpdate();
@@ -265,6 +265,12 @@ G.jobs.all.smoker = new G.jobs.template("Smoker", "smoker", "#ffaa33");
 G.jobs.all.builder = new G.jobs.template("Builder", "builder", "#ff33ff");
 G.jobs.all.architect = new G.jobs.template("Architect", "architect", "#ff33ff");
 
+//Initialize Crafting
+G.dataToSave.push("craftdata");
+G.craftdata = {}
+G.craftdata.maxCrafts = 0;
+G.crafting = {}
+
 //Initialize Inventory
 G.logger.info("Initializing Inventory", "bm");
 
@@ -380,12 +386,100 @@ G.evolution
         "Scraping out parts of an object to make another object", "#ffff33"))
     .AddResearch(new G.evolution.ResearchTemplate("Smelting", "smelting", ["crafting", "firemaking"], [100, 0, 0, 0],
         "Refining raw ores into processed metals", "#ffff33"))
-    .AddResearch(new G.evolution.ResearchTemplate("Multicrafting", "multicrafting", ["crafting"], [100, 0, 0, 0],
-        "Making multiple different crafting jobs at once", "#ffff33"))
-    .AddResearch(new G.evolution.ResearchTemplate("Building", "building", ["toolmaking"], [125, 50, 0, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Multicrafting I", "multicraft1", ["crafting"], [100, 0, 0, 0],
+        "Allows more crafting jobs at once", "#ffff33"))
+    .AddResearch(new G.evolution.ResearchTemplate("Multicrafting II", "multicraft2", ["multicraft1", "ToMath"], [150, 75, 0, 0],
+        "Using math, more things can be crafted at once", "#ffff33"))
+    .AddResearch(new G.evolution.ResearchTemplate("Multicrafting III", "multicraft3", ["multicraft2", "ToSci"], [250, 175, 100, 0],
+        "Using... Science? to increase maximum crafting tasks at once", "#ffff33"))
+    .AddResearch(new G.evolution.ResearchTemplate("Building", "building", ["toolmaking", "ToMath"], [125, 75, 0, 0],
         "Building more permanent structures to assist the colony", "#ffff33"))
-    .AddResearch(new G.evolution.ResearchTemplate("Architecture", "architecture", ["building"], [250, 150, 0, 0],
+    .AddResearch(new G.evolution.ResearchTemplate("Architecture", "architecture", ["building", "ToScience"], [350, 250, 100, 0],
         "The concept of making more advanced structures", "#ffff33"));
+
+//Research Complete Events
+G.RegisterBroadcast("resAdvInv", function () {
+    G.consoleOutput.push(G.c.c("#33ffff") + "The inventor has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("inventor");
+});
+G.RegisterBroadcast("resToMath", function () {
+    G.consoleOutput.push(G.c.c("#33ffff") + "The mathematician has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("mathematician");
+});
+G.RegisterBroadcast("resToSci", function () {
+    G.consoleOutput.push(G.c.c("#33ffff") + "The scientist has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("scientist");
+});
+G.RegisterBroadcast("resToAvi", function () {
+    G.consoleOutput.push(G.c.c("#33ffff") + "The aviation engineer has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("aviator");
+});
+G.RegisterBroadcast("resFishing", function () {
+    G.consoleOutput.push(G.c.c("#33ff33") + "The fisher has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("fisher");
+});
+G.RegisterBroadcast("resHunting", function () {
+    G.consoleOutput.push(G.c.c("#33ff33") + "The hunter has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("hunter");
+});
+G.RegisterBroadcast("resWoodcutting", function () {
+    G.consoleOutput.push(G.c.c("#33ff33") + "The woodcutter has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("woodcutter");
+});
+G.RegisterBroadcast("resDigging", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The digger has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("digger");
+});
+G.RegisterBroadcast("resMining", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The miner has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("miner");
+});
+G.RegisterBroadcast("resFiremaking", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The firemaker has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("firemaker");
+});
+G.RegisterBroadcast("resFiltering", function () {
+    G.consoleOutput.push(G.c.c("#3333ff") + "The water filterer has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("filterer");
+});
+G.RegisterBroadcast("resWaterCollecting", function () {
+    G.consoleOutput.push(G.c.c("#3333ff") + "The water collector has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("waterman");
+});
+G.RegisterBroadcast("resSmoking", function () {
+    G.consoleOutput.push(G.c.c("#ffaa33") + "The smoker has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("smoker");
+});
+G.RegisterBroadcast("resCrafting", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "Crafting has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("crafter");
+    G.commands.unlocked.push("craft");
+    G.craftdata.maxCrafts = 2;
+});
+G.RegisterBroadcast("resMulticraft1", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "You can now make up to 10 crafting tasks at once" + G.c.n);
+    G.craftdata.maxCrafts += 8;
+});
+G.RegisterBroadcast("resMulticraft2", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "You can now make up to 25 crafting tasks at once" + G.c.n);
+    G.craftdata.maxCrafts += 15;
+});
+G.RegisterBroadcast("resMulticraft3", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "You can now make up to 50 crafting tasks at once" + G.c.n);
+    G.craftdata.maxCrafts += 25;
+});
+G.RegisterBroadcast("resToolmaking", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The toolmaker has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("toolmaker");
+});
+G.RegisterBroadcast("resSmelting", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The smelter has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("smelter");
+});
+G.RegisterBroadcast("resCarving", function () {
+    G.consoleOutput.push(G.c.c("#ffff33") + "The carver has been unlocked" + G.c.n);
+    G.jobs.unlocked.push("carver");
+});
 
 //Initialize Loot Tables
 G.LootTable = function (name, id) {
@@ -570,7 +664,7 @@ G.RegisterCommand("Jobs", "manage worker job assignment", "jobs", "jobs", functi
 });
 
 G.RegisterCommand("Research", "select or view current colony research", "research", "research", function () {
-    var dropdown = 'What would you like to do? <select id="dropdown">' +
+    const dropdown = 'What would you like to do? <select id="dropdown">' +
         '<option style="color:red" value="0">Cancel</option>' +
         '<option style="color:darkred" value="1">Stop Current Research</option>' +
         '<option style="color:dodgerblue" value="2">Pick New Research</otpion>' +
@@ -608,6 +702,17 @@ G.RegisterCommand("Dev List Inventory", "list all item names and ids", "devListI
     }
     G.consoleOutput.push(invOut);
 }, false, true);
+
+G.RegisterCommand("Traits", "select or view current colony trait", "trait", "trait", function () {
+    const dropdown = 'What would you like to do? <select id="dropdown">' +
+        '<option style="color:red" value="0">Cancel</option>' +
+        '<option style="color:lightpink" value="1">Stop Current Trait</option>' +
+        '<option style="color:lightcoral" value="2">Pick New Trait</otpion>' +
+        '<option style="color:indianred" value="3">Check Evolved Traits</option></select>';
+    G.listeningDropdown = G.consoleOutput.push(dropdown);
+    G.listening = true;
+    G.listeningTo = "bmTraitOption";
+});
 
 //Initialize Events
 G.RegisterBroadcast("bmResearchOption", function () {
@@ -664,9 +769,11 @@ G.RegisterBroadcast("bmResearchOption", function () {
         if (options.length == 0) {
             G.consoleOutput.push(G.c.c("#ff6644") + "There is nothing to research." + G.c.n);
         }
-        var researchDropdown = G.c.c("deepskyblue") + 'What do you want to research? <select id="dropdown"><option value="-1" style="color:red">Cancel</option>' + G.c.n;
+        var researchDropdown = G.c.c("deepskyblue") + 'What do you want to research?<br>' +
+            'i: invention, m: math, s: science, a: aerospace<br>' +
+            '<select id="dropdown"><option value="-1" style="color:red">Cancel</option>' + G.c.n;
         for (i = 0; i < options.length; i++) {
-            researchDropdown += '<option value="' + i + '" style="color:' + options[i].color + '">' + options[i].name + "</option>";
+            researchDropdown += '<option value="' + i + '" style="color:' + options[i].color + '">' + options[i].name + " - " + `${options[i].cost[0]}i ${options[i].cost[1]}m ${options[i].cost[2]}s ${options[i].cost[3]}a` + "</option>";
         }
         researchDropdown += '</select>';
         G.listeningDropdown = G.consoleOutput.push(researchDropdown);
@@ -859,10 +966,19 @@ G.RegisterBroadcast("ccBegin", function () {
     G.Save();
 });
 G.RegisterBroadcast("ccEnd", function () {
+    G.craftdata.maxCrafts = 0;
+    G.evodata.research.progress = [0, 0, 0, 0];
+    G.evodata.research.needed = [0, 0, 0, 0];
+    G.evodata.research.current = null;
+    G.evodata.researchesResearched = [];
+    G.evodata.skillsLearned = [];
     G.colony.elder = 0;
     G.colony.adult = 0;
     G.colony.young = 0;
     G.eotw = -1;
+    for (const job in Object.keys(G.jobs.all)) {
+        G.jobs.all[job].count = 0;
+    }
     G.colony.name = "NO COLONY";
     G.commands.unlocked.push("settle");
     G.RemoveEntry(G.commands.hidden, "force-end");
@@ -1092,6 +1208,7 @@ G.BMEvolutionUpdate = function () {
         G.evodata.research.progress[3] >= G.evodata.research.needed[3]
     ) {
         G.logger.info("Research Complete: " + G.evodata.research.current, "bm");
+        G.consoleOutput.push(G.c.c("cornflowerblue") + G.evolution.FindResearchById(G.evodata.research.current).name + " has finished resarching!" + G.c.n);
         G.evodata.research.progress = [0, 0, 0, 0];
         G.evodata.research.needed = [0, 0, 0, 0];
         G.evodata.researchesResearched.push(G.evodata.research.current);
@@ -1183,8 +1300,8 @@ G.BMEvoPanelUpdate = function () {
                 continue;
             }
             newPanel += G.c.c(colors[i]) + types[i] + " " +
-            G.evodata.research.progress[i] + "/" + G.evodata.research.needed[i] +
-                "<br>" + G.GenBar(G.evodata.research.progress[i], G.evodata.research.needed[i], 10) + G.c.n;
+                G.evodata.research.progress[i] + "/" + G.evodata.research.needed[i] +
+                "<br>" + G.GenBar(G.evodata.research.progress[i], G.evodata.research.needed[i], 10) + G.c.n + "<br>";
         }
     }
     newPanel += G.c.r("mediumspringgreen") + "<br>- [TRAITS] -<br>";

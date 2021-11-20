@@ -26,21 +26,23 @@ html {
     max-height: 15rem;
     background-color: #0d0d0d;
     margin-bottom: 5px;
-    columns: auto;
     white-space: nowrap;
     overflow-y: hidden;
     overflow-x: auto;
 }
 
 .panel {
-    float: left;
+    vertical-align: top;
+    display: inline-block;
+    white-space: nowrap;
     background-color: #050505;
     padding: 6px;
     margin: 0px;
     margin-right: 4px;
     max-height: 14.2rem;
-    max-width: 35%;
+    max-width: 40%;
     overflow-x: auto;
+    overflow-y: auto;
 }
 
 #console {
