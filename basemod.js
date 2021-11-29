@@ -19,6 +19,22 @@ if (firstTime === null) {
         + G.c.n);
 };
 //window.localStorage.setItem("firstTime",false);
+G.readTextFile = function (file, runcode) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+                runcode(allText);
+            }
+        }
+    }
+    rawFile.send(null);
+}
 
 //Initialize Storage Objects
 G.chosenJob = "";
@@ -28,6 +44,7 @@ G.dataToSave.push("colony");
 G.dataToSave.push("jobs");
 G.dataToSave.push("stats");
 G.dataToSave.push("evodata");
+G.dataToSave.push("craftdata");
 G.storageEfficiency = 0.9;
 G.eotw = 0;
 
@@ -267,9 +284,106 @@ G.jobs.all.architect = new G.jobs.template("Architect", "architect", "#ff33ff");
 
 //Initialize Crafting
 G.dataToSave.push("craftdata");
-G.craftdata = {}
+G.craftdata = {};
 G.craftdata.maxCrafts = 0;
-G.crafting = {}
+G.craftdata.unlocked = [];
+G.crafting = {};
+G.crafting.recipes = {};
+G.crafting.AddRecipe = function (recipe) {
+    G.crafting.recipes[recipe.id] = recipe;
+    return this;
+}
+/**
+ * A new crafting recipe
+ * @param {string} id - The unique id to assign to the recipe, this will be how to refer to the recipe later
+ * @param {string} name - The display name of the recipe
+ * @param {string} input - A list of objects that contains input items - {type: "item", item: "[itemid]", count: [count]}
+ * @param {string} output - A list of objects that contains output items - {type: "item", item: "[itemid]", count: [count]}
+ * @param {string} type - The type of the crafting recipe, useful in cases where you want a job to craft all recipes of a type
+ * Optionally for input and output objects, you can use a loot table - {type: "loot", table: "[tableid]", rolls: [rolls]}
+ */
+G.crafting.Recipe = function (id, name, input, output, type, unlocked=false) {
+    recipe = {}
+    recipe.id = id;
+    recipe.name = name;
+    recipe.input = input;
+    recipe.output = output;
+    recipe.type = type;
+    if (input.length === undefined || output.length === undefined) {
+        G.logger.error("The input or output is not a valid array", "bm", true);
+    }
+    if (G.crafting.recipes[id] != undefined) {
+        G.logger.error("The recipe id " + id + " aready exists", "bm", true);
+    }
+    G.crafting.recipes[id] = recipe;
+    if (unlocked) {
+        G.craftdata.unlocked.push(recipe.id);
+    }
+}
+/**
+ * @constructor
+ * Loads a crafting recipe from a .json file
+ * @param {string} location - The location or url of the .json file to access
+ */
+G.crafting.LoadRecipe = function (location, unlocked=false) {
+    G.readTextFile(location, function(recipeData) {
+        recipe = {};
+        if (recipeData.id == undefined) {
+            G.logger.error("The id of a recipe from " + location + " is undefined", "bm", true);
+        }
+        if (recipeData.name == undefined) {
+            G.logger.error("The name of a recipe from " + location + " is undefined", "bm", true);
+        }
+        if (recipeData.input == undefined) {
+            G.logger.error("The input of a recipe from " + location + " is undefined", "bm", true);
+        }
+        if (recipeData.output == undefined) {
+            G.logger.error("The output of a recipe from " + location + " is undefined", "bm", true);
+        }
+        if (recipeData.type == undefined) {
+            G.logger.warn("The type of a recipe from " + location + " is undefined", "bm", true);
+        }
+        if (recipeData.input.length == undefined) {
+            G.logger.error("The input of a recipe from " + location + " is not a valid array", "bm", true);
+        }
+        if (recipeData.output.length == undefined) {
+            G.logger.error("The output of a recipe from " + location + " is not a valid array", "bm", true);
+        }
+        recipe.id = recipeData.id;
+        recipe.name = recipeData.name;
+        recipe.input = recipeData.input;
+        recipe.output = recipeData.output;
+        recipe.type = recipeData.type;
+        if (G.crafting.recipes[id] != undefined) {
+            G.logger.error("The recipe id " + id + " aready exists for the recipe from " + location, "bm", true);
+        }
+        G.crafting.recipes[id] = recipe;
+        if (unlocked) {
+            G.craftdata.unlocked.push(recipe.id);
+        }
+    });
+}
+G.crafting.GetRecipesByType = function (type) {
+
+}
+G.crafting.GetRecipeById = function (id) {
+
+}
+/**
+ * Assigns a recipe to a job
+ */
+G.crafting.AssignRecipe = function (recipe) {
+
+}
+/**
+ * Configures the recipe(s) a job does
+ */
+G.crafting.RecipeConfig = function (job, times, type=null) {
+    
+}
+
+G.crafting
+    .AddRecipe(new G.crafting.LoadRecipe(""));
 
 //Initialize Inventory
 G.logger.info("Initializing Inventory", "bm");
@@ -331,7 +445,8 @@ G.inventory.electric = new G.InventoryCategory(G.c.c("#ff9333") + "Electronic Co
     .AddItem(new G.InventoryItem(G.c.c("#55ee55") + "Circuit Board" + G.c.n, "electric", "circuit-board"));
 
 //Initialize Equipment
-G.inventory.equipment = new G.InventoryCategory("Equipment", "equipmet");
+G.inventory.equipment = new G.InventoryCategory("Equipment", "equipment")
+    .AddItem(new G.InventoryItem("Campfire", "equipment", "campfire"));
 
 //Initialize Other
 G.inventory.other = new G.InventoryCategory("Other", "other");
@@ -697,7 +812,7 @@ G.RegisterCommand("Dev List Inventory", "list all item names and ids", "devListI
     for (const category of Object.keys(G.inventory)) {
         invOut += "<br>[" + G.inventory[category].name.toUpperCase() + "]"
         for (const item of G.inventory[category].items) {
-            invOut += "<br>" + item.name + " - " + item.itemid;
+            invOut += "<br>" + item.name + ": " + item.itemid;
         }
     }
     G.consoleOutput.push(invOut);

@@ -1,0 +1,19 @@
+{
+    "id": "cookedMeat",
+    "name": "Cooked Meat",
+    "input": [
+        {
+            "type": "item",
+            "item": "raw-meat",
+            "count": 1
+        }
+    ],
+    "output": [
+        {
+            "type": "item",
+            "item": "cooked-meat",
+            "count": 1
+        }
+    ],
+    "type": "bm/smoking"
+}
