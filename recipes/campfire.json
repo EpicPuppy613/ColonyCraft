@@ -1,0 +1,19 @@
+{
+    "id": "camfireSticks",
+    "name": "Campfire from Sticks",
+    "input": [
+        {
+            "type": "item",
+            "item": "sticks",
+            "count": 5
+        }
+    ],
+    "output": [
+        {
+            "type": "item",
+            "item": "campfire",
+            "count": 1
+        }
+    ],
+    "type": "firemaker"
+}

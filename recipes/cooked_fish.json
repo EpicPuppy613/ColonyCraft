@@ -1,0 +1,19 @@
+{
+    "id": "cookedFish",
+    "name": "Cooked Fish",
+    "input": [
+        {
+            "type": "item",
+            "item": "raw-fish",
+            "count": 1
+        }
+    ],
+    "output": [
+        {
+            "type": "item",
+            "item": "cooked-fish",
+            "count": 1
+        }
+    ],
+    "type": "bm/smoking"
+}

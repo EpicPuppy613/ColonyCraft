@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>ColonyCraft</title>
+    <link href="style.css" rel="stylesheet" type="text/css"/>
+    <link rel="icon" type="image/icon" href="ccIcon.png"/>
+  </head>
+  <body>
+    <div id="game">
+        <div id="panels">
+        </div>  
+        <div id="consoleContainer">
+            <p id="console">
+                
+            </p>
+            <div id="inputContainer">
+                > <input autocomplete="off" maxlength="75" id="commandInput"/>
+            </div>
+        </div>
+        <div id="settings">
+            <strong>Settings</strong><br>
+            <label for="consoleHeight">Console Height:</label>
+            <input type="number" name="Console Height" min="5" max="50" id="consoleHeight" value="35"/><br>
+            <label for="panelHeight">Panel Height:</label>
+            <input type="number" name="Panel Height" min="5" max="40" id="panelHeight" value="15"/><br>
+            <button type="button" onclick="G.UpdateSettings()">Update</button>
+        </div>
+    </div>
+    <div id="loading">
+        <h2>Game loading, please wait...</h2>
+        <img src="ccIcon.gif" height=192><br>
+        <h3 style="color: #dd0000" id="loadErrors"></h3>
+    </div> 
+    <script src="init.js"></script>
+  </body>
+</html>

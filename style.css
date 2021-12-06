@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+
+html {
+    background-color: #111111;
+    color: white;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+}
+
+#loading {
+    text-align: center;
+}
+
+#commandInput {
+    width: 50%;
+    font-family: 'Source Code Pro', monospace;
+}
+
+#consoleContainer {
+    padding: 5px;
+    background-color: black;
+}
+
+#panels {
+    min-height: 15rem;
+    max-height: 15rem;
+    background-color: #0d0d0d;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+.panel {
+    vertical-align: top;
+    display: inline-block;
+    white-space: nowrap;
+    background-color: #050505;
+    padding: 6px;
+    margin: 0px;
+    margin-right: 4px;
+    max-height: 14.2rem;
+    max-width: 40%;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+#console {
+    min-height: 35rem;
+    max-height: 35rem;
+    overflow-y: auto;
+}
+
+#commandInput {
+    background-color: black;
+    color: white;
+    border: gray solid 1px;
+}
+
+#settings {
+    margin: 5px;
+}
+
+select {
+    font-family: 'Source Code Pro', monospace;
+}
+
+option {
+    font-family: 'Source Code Pro', monospace;
+    background: black;
+}
