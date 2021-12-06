@@ -170,10 +170,10 @@ G.FoodItem = function (name, catid, itemid, saturation, enjoyment, health, prior
     this.type = type;
     if (G.highestPriority[type] === undefined) {
         G.highestPriority[type] = 0;
-    };
+    }
     if (G.highestPriority[type] < this.priority) {
         G.highestPriority[type] = this.priority;
-    };
+    }
 };
 
 //Initialize Inventory Functions
@@ -281,7 +281,7 @@ G.MatchArray = function (array, match) {
         return false
     } else {
         return true
-    };
+    }
 };
 
 /**
@@ -298,7 +298,7 @@ G.UpdateConsole = function () {
         }
         currentConsole = currentConsole + line
         firstLine = false;
-    };
+    }
     G.gameConsole.innerHTML = currentConsole;
     G.gameConsole.scrollTop = G.gameConsole.scrollHeight;
 };
@@ -349,7 +349,7 @@ G.LoadMods = function () {
         document.getElementById("loading").style.display = "none";
         G.consoleOutput.push("----------<br>" + G.c.c("#00bfbf") + "ColonyCraft WEB ALPHA v1.1.0" + G.c.n);
         G.UpdateConsole();
-    };
+    }
     G.currentModIndex++
 };
 
@@ -387,7 +387,7 @@ G.RegisterCommand = function (name, desc, id, ref, commandFunction, unlocked = f
 G.RegisterBroadcast = function (broadcast, broadcastFunction) {
     if (G.broadcastDirectory[broadcast] == undefined) {
         G.broadcastDirectory[broadcast] = [];
-    };
+    }
     G.broadcastDirectory[broadcast].push(broadcastFunction);
 };
 
@@ -405,11 +405,11 @@ G.RunCommand = function (command) {
             G.commandDirectory[command]();
         } catch (err) {
             G.logger.error(err.stack);
-        };
-    };
+        }
+    }
     if (!success) {
         G.consoleOutput.push(G.c.c("#dddd00") + "Unreconized command. Use 'help' for help." + G.c.n);
-    };
+    }
     G.UpdateConsole();
 };
 
@@ -437,7 +437,7 @@ G.RemoveEntry = function (arrayRemove, value) {
     const arrayIndex = arrayRemove.indexOf(value);
     if (arrayIndex > -1) {
         arrayRemove.splice(arrayIndex, 1);
-    };
+    }
     return arrayRemove
 };
 
@@ -454,21 +454,21 @@ G.RegisterMod = function (modInfo) {
     if (modInfo.modid == undefined) {
         loadError.innerHTML = "ERROR: a modid is undefined";
         throw "LoadError: modid is undefined";
-    };
+    }
     if (modInfo.parents == undefined) {
         loadError.innerHTML = "ERROR: the parents of mod " + modInfo.modid + " is undefined";
         throw "LoadError: parents of mod " + modInfo.modid + " is undefined";
-    };
+    }
     if (G.MatchArray(G.initializedMods,modInfo.modid)) {
         loadError.innerHTML = "ERROR: there is a duplicate mod id of " + modid;
         throw "LoadError: duplicate mod id " + modid;
-    };
+    }
     for (modRequirement of modInfo.parents) {
         if (!G.MatchArray(G.initializedMods,modRequirement)) {
             loadError.innerHTML = "ERROR LOADING MOD: " + modInfo.modid + " requres mod " + modRequirement + " to function properly.";
             throw "LoadError: parent '" + modRequirement + "' does not exist for mod '" + modInfo.modid + "'";
-        };
-    };
+        }
+    }
     G.logger.info("REGISTERED MOD: " + modInfo.modid);
     G.initializedMods.push(modInfo.modid);
 };
@@ -489,10 +489,10 @@ G.GenBar = function (value, max, length, left = "", segment = "â–°", empty = "â–
     var output = left
     for (f = 0; f < barAmount; f++) {
         output = output + segment;
-    };
+    }
     for (e = 0; e < length - barAmount; e++) {
         output = output + empty;
-    };
+    }
     output = output + right;
     return output;
 };
@@ -503,7 +503,7 @@ document.addEventListener('keydown', function (event) {
             prevListening = true
         } else {
             prevListening = false
-        };
+        }
         G.listening = false;
         
         var commandRun = G.inputBox.value;
@@ -518,7 +518,7 @@ document.addEventListener('keydown', function (event) {
             G.Broadcast(G.listeningTo, commandRun);
         }
         G.UpdateConsole();
-    };
+    }
 });
 
 G.consoleOutput.push("LOADING MODS...");
