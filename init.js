@@ -483,17 +483,18 @@ G.RegisterMod = function (modInfo) {
  * @param {string} empty - [optional] A unfilled segment of the bar
  * @param {string} right - [optional] The right border of the bar
  */
-G.GenBar = function (value, max, length, left = "", segment = "▰", empty = "▱", right = "") {
+G.GenBar = function (value, max, length, left = "[", segment = "=", empty = "=", right = "</span>]", transition = '<span style="color:gray">') {
     var progress = value / max
     var barAmount = Math.round(progress * length)
     var output = left
     for (f = 0; f < barAmount; f++) {
-        output = output + segment;
+        output += segment;
     };
+    output += transition;
     for (e = 0; e < length - barAmount; e++) {
-        output = output + empty;
+        output += empty;
     };
-    output = output + right;
+    output += right;
     return output;
 };
 

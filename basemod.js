@@ -1,4 +1,4 @@
-    G.logger.info("REGISTERING MOD", "bm");
+G.logger.info("REGISTERING MOD", "bm");
 G.RegisterMod({
     name: "Basemod",
     version: "1.1.0",
@@ -19,21 +19,9 @@ if (firstTime === null) {
         + G.c.n);
 };
 //window.localStorage.setItem("firstTime",false);
-G.readTextFile = function (file, runcode) {
-    var rawFile = new XMLHttpRequest();
-    rawFile.open("GET", file, true);
-    rawFile.onreadystatechange = function ()
-    {
-        if(rawFile.readyState === 4)
-        {
-            if(rawFile.status === 200 || rawFile.status == 0)
-            {
-                var allText = rawFile.responseText;
-                runcode(allText);
-            }
-        }
-    }
-    rawFile.send(null);
+G.ReadTextFile = async function ReadTextFile(file) {
+    var res = await fetch(file);
+    return await res.json();
 }
 
 //Initialize Storage Objects
@@ -289,10 +277,6 @@ G.craftdata.maxCrafts = 0;
 G.craftdata.unlocked = [];
 G.crafting = {};
 G.crafting.recipes = {};
-G.crafting.AddRecipe = function (recipe) {
-    G.crafting.recipes[recipe.id] = recipe;
-    return this;
-}
 /**
  * A new crafting recipe
  * @param {string} id - The unique id to assign to the recipe, this will be how to refer to the recipe later
@@ -302,7 +286,7 @@ G.crafting.AddRecipe = function (recipe) {
  * @param {string} type - The type of the crafting recipe, useful in cases where you want a job to craft all recipes of a type
  * Optionally for input and output objects, you can use a loot table - {type: "loot", table: "[tableid]", rolls: [rolls]}
  */
-G.crafting.Recipe = function (id, name, input, output, type, unlocked=false) {
+G.crafting.Recipe = function (id, name, input, output, type, unlocked = false) {
     recipe = {}
     recipe.id = id;
     recipe.name = name;
@@ -325,65 +309,112 @@ G.crafting.Recipe = function (id, name, input, output, type, unlocked=false) {
  * Loads a crafting recipe from a .json file
  * @param {string} location - The location or url of the .json file to access
  */
-G.crafting.LoadRecipe = function (location, unlocked=false) {
-    G.readTextFile(location, function(recipeData) {
-        recipe = {};
-        if (recipeData.id == undefined) {
-            G.logger.error("The id of a recipe from " + location + " is undefined", "bm", true);
-        }
-        if (recipeData.name == undefined) {
-            G.logger.error("The name of a recipe from " + location + " is undefined", "bm", true);
-        }
-        if (recipeData.input == undefined) {
-            G.logger.error("The input of a recipe from " + location + " is undefined", "bm", true);
-        }
-        if (recipeData.output == undefined) {
-            G.logger.error("The output of a recipe from " + location + " is undefined", "bm", true);
-        }
-        if (recipeData.type == undefined) {
-            G.logger.warn("The type of a recipe from " + location + " is undefined", "bm", true);
-        }
-        if (recipeData.input.length == undefined) {
-            G.logger.error("The input of a recipe from " + location + " is not a valid array", "bm", true);
-        }
-        if (recipeData.output.length == undefined) {
-            G.logger.error("The output of a recipe from " + location + " is not a valid array", "bm", true);
-        }
-        recipe.id = recipeData.id;
-        recipe.name = recipeData.name;
-        recipe.input = recipeData.input;
-        recipe.output = recipeData.output;
-        recipe.type = recipeData.type;
-        if (G.crafting.recipes[id] != undefined) {
-            G.logger.error("The recipe id " + id + " aready exists for the recipe from " + location, "bm", true);
-        }
-        G.crafting.recipes[id] = recipe;
-        if (unlocked) {
-            G.craftdata.unlocked.push(recipe.id);
-        }
-    });
+G.crafting.FetchRecipe = async function (location) {
+    recipeData = await G.ReadTextFile(location);
+    verified = G.crafting.VerifyRecipe(recipeData);
+    G.crafting.recipes[verified.id] = verified;
+    if (unlocked) {
+        G.craftdata.unlocked.push(verified.id);
+    }
 }
-G.crafting.GetRecipesByType = function (type) {
+G.crafting.LoadRecipe = function (location) {
+    this.FetchRecipe(location);
+    return this;
+}
+G.crafting.VerifyRecipe = function (recipeData) {
+    if (recipeData.id === undefined) {
+        G.logger.error("The id of a recipe from " + location + " is undefined", "bm", true);
+    }
+    if (recipeData.name === undefined) {
+        G.logger.error("The name of a recipe from " + location + " is undefined", "bm", true);
+    }
+    if (recipeData.input === undefined) {
+        G.logger.error("The input of a recipe from " + location + " is undefined", "bm", true);
+    }
+    if (recipeData.output === undefined) {
+        G.logger.error("The output of a recipe from " + location + " is undefined", "bm", true);
+    }
+    if (recipeData.type === undefined) {
+        G.logger.warn("The type of a recipe from " + location + " is undefined", "bm", true);
+    }
+    if (recipeData.input.length === undefined) {
+        G.logger.error("The input of a recipe from " + location + " is not a valid array", "bm", true);
+    }
+    if (recipeData.output.length === undefined) {
+        G.logger.error("The output of a recipe from " + location + " is not a valid array", "bm", true);
+    }
+    const recipe = {}
+    recipe.id = recipeData.id;
+    recipe.name = recipeData.name;
+    recipe.input = recipeData.input;
+    recipe.output = recipeData.output;
+    recipe.type = recipeData.type;
+    if (G.crafting.recipes[recipe.id] != undefined) {
+        G.logger.error("The recipe id " + id + " aready exists for the recipe from " + location, "bm", true);
+    }
+    return recipe;
+}
 
+G.crafting.GetRecipesByType = function (type) {
+    var recipes = []
+    for (const recipe of Object.keys(G.crafting.recipes)) {
+        if (G.crafting.recipes.recipe.type == type) {
+            recipes.push(G.crafting.recipes.recipe);
+        }
+    }
+    return recipes;
 }
 G.crafting.GetRecipeById = function (id) {
-
+    for (const recipe of Object.keys(G.crafting.recipes)) {
+        if (G.crafting.recipes.recipe.id == id) {
+            return G.crafting.recipes.recipe;
+        }
+    }
+    return;
 }
 /**
  * Assigns a recipe to a job
  */
-G.crafting.AssignRecipe = function (recipe) {
-
+G.crafting.AssignRecipe = function (job, recipe) {
+    const assignJob = G.jobs[job];
+    if (assignJob === undefined) {
+        G.logger.warn("Job " + job + " does not exist.", bm);
+        return this;
+    }
+    if (assignJob.crafting === undefined) {
+        assignJob.crafting = {}
+    }
+    if (assignJob.crafting.recipes === undefined) {
+        assignJob.crafting.recipes = []
+    }
+    assignJob.crafting.recipes.push(recipes);
+    return this;
 }
 /**
  * Configures the recipe(s) a job does
  */
-G.crafting.RecipeConfig = function (job, times, type=null) {
-    
+G.crafting.RecipeConfig = function (job, times, type = null) {
+    const assignJob = G.jobs[job];
+    if (assignJob === undefined) {
+        G.logger.warn("Job " + job + " does not exist.", bm);
+        return this;
+    }
+    if (assignJob.crafting === undefined) {
+        assignJob.crafting = {}
+    }
+    assignJob.crafting.times = times;
+    if (type != null) {
+        assignJob.crafting.type = type;
+    }
+    return this;
 }
 
 G.crafting
-    .AddRecipe(new G.crafting.LoadRecipe(""));
+    .LoadRecipe("./recipes/campfireSticks.json")
+    .LoadRecipe("./recipes/cooked_fish.json")
+    .LoadRecipe("./recipes/cooked_meat.json")
+    .AssignRecipe("firemaker", "campfireSticks")
+    .RecipeConfig("firemaker", 5);
 
 //Initialize Inventory
 G.logger.info("Initializing Inventory", "bm");
@@ -1244,7 +1275,7 @@ G.BMStatsPanelUpdate = function () {
         G.c.c("#00ccee") + "Skill Points: " + G.stats.skillpts + "<br>" + G.c.n +
         G.c.c("#00dddd") + "Talent Points: " + G.stats.talentpts + "<br>" + G.c.n +
         G.c.c("#00eecc") + "XP: " + G.stats.xp + "/" + G.stats.lvlup + "<br>" + G.c.n +
-        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 10) + G.c.n;
+        G.c.c("#00ffaa") + G.GenBar(G.stats.xp, G.stats.lvlup, 15) + G.c.n;
     statsPanel.innerHTML = writePanel;
 };
 
@@ -1302,6 +1333,21 @@ G.BMConditionUpdate = function () {
     G.colony.colorMorale = "rgb(" + (255 - subRMorale) + "," + (255 - subGMorale) + ",0)";
     G.colony.colorHealth = "rgb(" + (255 - subRHealth) + "," + (255 - subGHealth) + ",0)";
     G.colony.colorOverall = "rgb(" + (255 - subROverall) + "," + (255 - subGOverall) + ",0)";
+};
+
+G.BMCraftingUpdate = function () {
+    for (const job of Object.keys(G.jobs.all)) {
+        const craftJob = G.jobs.all[job];
+        if (craftJob.crafting === undefined) {
+            continue;
+        }
+        if (craftJob.crafting.type !== null || craftJob.crafting.type !== undefined) {
+            continue;
+        }
+        for (i = 0; i < craftJob.count * craftJob.crafting.times; i++) {
+            const chooseCraft = G.RandBetween(0, craftJob.crafting.recipes.length);
+        }
+    }  
 };
 
 G.BMEvolutionUpdate = function () {
@@ -1416,7 +1462,7 @@ G.BMEvoPanelUpdate = function () {
             }
             newPanel += G.c.c(colors[i]) + types[i] + " " +
                 G.evodata.research.progress[i] + "/" + G.evodata.research.needed[i] +
-                "<br>" + G.GenBar(G.evodata.research.progress[i], G.evodata.research.needed[i], 10) + G.c.n + "<br>";
+                "<br>" + G.GenBar(G.evodata.research.progress[i], G.evodata.research.needed[i], 15) + G.c.n + "<br>";
         }
     }
     newPanel += G.c.r("mediumspringgreen") + "<br>- [TRAITS] -<br>";
