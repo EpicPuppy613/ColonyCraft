@@ -264,8 +264,8 @@ G.RandBetween = function (min, max) {
     if (min > max) {
         throw "ValueError: minimum value cannot be over maximum value";
     }
-    var range = max - min + 1;
-    var num = Math.floor(Math.random() * range);
+    const range = max - min + 1;
+    const num = Math.floor(Math.random() * range);
     return num + min;
 };
 

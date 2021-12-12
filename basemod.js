@@ -309,7 +309,7 @@ G.crafting.Recipe = function (id, name, input, output, type, unlocked = false) {
  * Loads a crafting recipe from a .json file
  * @param {string} location - The location or url of the .json file to access
  */
-G.crafting.FetchRecipe = async function (location) {
+G.crafting.FetchRecipe = async function (location, unlocked = false) {
     recipeData = await G.ReadTextFile(location);
     verified = G.crafting.VerifyRecipe(recipeData);
     G.crafting.recipes[verified.id] = verified;
@@ -365,10 +365,8 @@ G.crafting.GetRecipesByType = function (type) {
     return recipes;
 }
 G.crafting.GetRecipeById = function (id) {
-    for (const recipe of Object.keys(G.crafting.recipes)) {
-        if (G.crafting.recipes.recipe.id == id) {
-            return G.crafting.recipes.recipe;
-        }
+    if (id in G.crafting.recipes) {
+        return G.crafting.recipes[id];
     }
     return;
 }
@@ -376,9 +374,9 @@ G.crafting.GetRecipeById = function (id) {
  * Assigns a recipe to a job
  */
 G.crafting.AssignRecipe = function (job, recipe) {
-    const assignJob = G.jobs[job];
+    const assignJob = G.jobs.all[job];
     if (assignJob === undefined) {
-        G.logger.warn("Job " + job + " does not exist.", bm);
+        G.logger.warn("Job " + job + " does not exist.", "bm");
         return this;
     }
     if (assignJob.crafting === undefined) {
@@ -387,16 +385,16 @@ G.crafting.AssignRecipe = function (job, recipe) {
     if (assignJob.crafting.recipes === undefined) {
         assignJob.crafting.recipes = []
     }
-    assignJob.crafting.recipes.push(recipes);
+    assignJob.crafting.recipes.push(recipe);
     return this;
 }
 /**
  * Configures the recipe(s) a job does
  */
 G.crafting.RecipeConfig = function (job, times, type = null) {
-    const assignJob = G.jobs[job];
+    const assignJob = G.jobs.all[job];
     if (assignJob === undefined) {
-        G.logger.warn("Job " + job + " does not exist.", bm);
+        G.logger.warn("Job " + job + " does not exist.", "bm");
         return this;
     }
     if (assignJob.crafting === undefined) {
@@ -408,13 +406,58 @@ G.crafting.RecipeConfig = function (job, times, type = null) {
     }
     return this;
 }
+//Craft recipes for job
+G.crafting.RollRecipes = function (job) {
+    const recipeJob = G.jobs.all[job];
+    if (recipeJob.crafting.times === undefined) {
+        return;
+    }
+    var fails = 0;
+    for (let i = 0; i < recipeJob.crafting.times * recipeJob.count; i++) {
+        const recipe = recipeJob.crafting.recipes[G.RandBetween(0, recipeJob.crafting.recipes.length - 1)];
+        const result = G.crafting.Craft(G.crafting.GetRecipeById(recipe));
+        if (result !== 0) {
+            fails++;
+            i--;
+        }
+        if (fails > recipeJob.crafting.times) {
+            break;
+        }
+    }
+}
+
+/**
+ * Return codes: 0 = crafted, 1 = insufficient materials
+ * @param {*} recipe 
+ * @returns {int}
+ */
+G.crafting.Craft = function (recipe) {
+    const input = recipe.input;
+    const output = recipe.output;
+    for (const item of input) {
+        if (G.GetItemById(item.item).count < item.count) {
+            return 1;
+        }
+    }
+    for (const item of output) {
+        if (item.type == "item") {
+            G.GetItemById(item.item).count += item.count;
+        } else if (item.type == "loot") {
+            G.tables[item.table].Roll(item.count);
+        }
+    }
+    return 0;
+}
 
 G.crafting
     .LoadRecipe("./recipes/campfireSticks.json")
     .LoadRecipe("./recipes/cooked_fish.json")
     .LoadRecipe("./recipes/cooked_meat.json")
     .AssignRecipe("firemaker", "campfireSticks")
-    .RecipeConfig("firemaker", 5);
+    .RecipeConfig("firemaker", 5)
+    .AssignRecipe("smoker", "cooked_fish")
+    .AssignRecipe("smoker", "cooked_meat")
+    .RecipeConfig("smoker", 12);
 
 //Initialize Inventory
 G.logger.info("Initializing Inventory", "bm");
@@ -861,6 +904,44 @@ G.RegisterCommand("Traits", "select or view current colony trait", "trait", "tra
 });
 
 //Initialize Events
+
+//MAIN TICK FUNCTION
+G.RegisterBroadcast("ccTick", function () {
+    for (const job of Object.keys(G.jobs.all)) {
+        var rollJob = G.jobs.all[job];
+        if (rollJob.loot.table != null) {
+            G.tables[rollJob.loot.table].Roll(Math.round(rollJob.count * rollJob.loot.rolls * G.colony.modifierWork));
+        }
+        if (rollJob.crafting !== undefined) {
+            if (rollJob.crafting.times !== undefined) {
+                G.crafting.RollRecipes(rollJob.id);
+            }
+        }
+    }
+    G.BMEvolutionUpdate();
+    G.BMColonyConsume("f", "food");
+    G.BMColonyConsume("l", "water");
+    G.BMConditionUpdate();
+    G.BMPopulationUpdate();
+    G.BMInventoryDecay();
+    G.BMColonyPanelUpdate();
+    G.BMInvPanelUpdate();
+    G.BMEvoPanelUpdate();
+    if ((G.colony.adult + G.colony.elder + G.colony.young) <= 8) {
+        G.consoleOutput.push(G.c.c("#ff0000") + "Your colony is dying, there is no hope left, you abandon your colony to try again." + G.c.n);
+        G.Broadcast("ccEnd");
+        return;
+    }
+    if (G.eotw == 5) {
+        G.consoleOutput.push(G.c.c("#ee4444") + "The ground rumbles... The end of the world is near..." + G.c.n);
+    } else if (G.eotw == 0) {
+        G.consoleOutput.push(G.c.c("#ff0000") + "THE END OF THE WORLD IS HERE<br>" + G.c.r("#ee4444") + "You are forced to ascend to avoid the terrors of the end." + G.c.n);
+        G.Broadcast("bmConfirmAscend", "y");
+        return;
+    };
+    G.Save();
+});
+
 G.RegisterBroadcast("bmResearchOption", function () {
     const value = document.getElementById("dropdown").value;
     const replacements = ["Cancel", "Stop Current Research", "Pick New Research", "Check Researched Technologies"];
@@ -1208,37 +1289,6 @@ G.RegisterBroadcast("bmCheatHealth", function (args) {
     G.consoleOutput.push(G.c.c("#00ee00") + "Successfully cheated health value" + G.c.n);
     return
 });
-G.RegisterBroadcast("ccTick", function () {
-    for (const job of Object.keys(G.jobs.all)) {
-        var rollJob = G.jobs.all[job];
-        if (rollJob.loot.table == null) {
-            continue;
-        }
-        G.tables[rollJob.loot.table].Roll(Math.round(rollJob.count * rollJob.loot.rolls * G.colony.modifierWork));
-    }
-    G.BMEvolutionUpdate();
-    G.BMColonyConsume("f", "food");
-    G.BMColonyConsume("l", "water");
-    G.BMConditionUpdate();
-    G.BMPopulationUpdate();
-    G.BMInventoryDecay();
-    G.BMColonyPanelUpdate();
-    G.BMInvPanelUpdate();
-    G.BMEvoPanelUpdate();
-    if ((G.colony.adult + G.colony.elder + G.colony.young) <= 8) {
-        G.consoleOutput.push(G.c.c("#ff0000") + "Your colony is dying, there is no hope left, you abandon your colony to try again." + G.c.n);
-        G.Broadcast("ccEnd");
-        return;
-    }
-    if (G.eotw == 5) {
-        G.consoleOutput.push(G.c.c("#ee4444") + "The ground rumbles... The end of the world is near..." + G.c.n);
-    } else if (G.eotw == 0) {
-        G.consoleOutput.push(G.c.c("#ff0000") + "THE END OF THE WORLD IS HERE<br>" + G.c.r("#ee4444") + "You are forced to ascend to avoid the terrors of the end." + G.c.n);
-        G.Broadcast("bmConfirmAscend", "y");
-        return;
-    };
-    G.Save();
-});
 G.RegisterBroadcast("saveLoaded", function () {
     if (G.colony.name != "NO COLONY") {
         G.BMColonyPanelUpdate();
@@ -1391,6 +1441,20 @@ G.BMPopulationUpdate = function () {
         "<br>" + deathAmt + " elderly have died.<br>" + G.c.r("#33dd00") +
         bornAmt + " children have been born.<br>" + G.c.r("#dd33dd") +
         "Your new worker count is " + G.colony.adult + G.c.n);
+    var workers = 0
+    for (const job of Object.keys(G.jobs.all)) {
+        workers += G.jobs.all[job].count;
+    }
+    if (workers > G.colony.adult) {
+        for (let w = 0; w < workers - G.colony.adult; w++) {
+            const removeJob = G.RandBetween(0, Object.keys(G.jobs.all).length);
+            if (G.jobs.all[removeJob].count > 0) {
+                G.jobs.all[removeJob].count--;
+            } else {
+                w--;
+            }
+        }
+    }
 };
 
 G.BMColonyConsume = function (type, name, adultmodifier = 1, eldermodifier = 1, youngmodifier = 0.5, moralemodifier = 15, healthmodifier = 15) {
